@@ -88,6 +88,19 @@ export const createConversation = async (req, res) => {
       participants: formattedParticipants,
     };
 
+    let clearedTime = null;
+    if (formattedConversation.clearedAt) {
+      clearedTime = formattedConversation.clearedAt instanceof Map 
+        ? formattedConversation.clearedAt.get(userId.toString()) 
+        : formattedConversation.clearedAt[userId.toString()];
+    }
+
+    if (clearedTime && formattedConversation.lastMessageAt) {
+      if (new Date(formattedConversation.lastMessageAt) <= new Date(clearedTime)) {
+        formattedConversation.lastMessage = null;
+      }
+    }
+
     const io = req.app.get("io");
     if (io) {
       formattedConversation.participants.forEach((p) => {
@@ -143,18 +156,37 @@ export const getConversations = async (req, res) => {
         ? Object.fromEntries(convo.nicknames) 
         : convo.nicknames || {};
 
+      const convoObj = convo.toObject();
+
+      let clearedTime = null;
+      if (convoObj.clearedAt) {
+        // Handle both Map and Object representations
+        clearedTime = convoObj.clearedAt instanceof Map 
+          ? convoObj.clearedAt.get(userId.toString()) 
+          : convoObj.clearedAt[userId.toString()];
+      }
+
+      if (clearedTime && convoObj.lastMessageAt) {
+        if (new Date(convoObj.lastMessageAt) <= new Date(clearedTime)) {
+          convoObj.lastMessage = null;
+        }
+      }
+
       return {
-        ...convo.toObject(),
+        ...convoObj,
         streak: getEffectiveStreak(convo.streak),
         unreadCounts: convo.unreadCounts || {},
         participants,
         nicknames: nicknamesObj,
       };
     }).filter(convo => {
-      // Direct conversations are always kept so friends are never lost on reload
-      if (convo.type === "direct") return true;
+      // Ignore direct conversations if the other user has deleted their account
+      if (convo.type === "direct") {
+        const hasDeletedUser = convo.participants.some(p => !p._id);
+        if (hasDeletedUser) return false;
+      }
 
-      // Ignore group conversations if cleared and no new messages
+      // Ignore conversations if cleared and no new messages (applies to all types)
       if (convo.clearedAt && convo.clearedAt instanceof Map) {
         const clearedTime = convo.clearedAt.get(userId.toString());
         if (clearedTime && convo.lastMessageAt) {
@@ -614,12 +646,14 @@ export const addGroupMembers = async (req, res) => {
     const io = req.app.get("io");
     if (io) {
       conversation.participants.forEach(p => {
-        io.to(`user:${p.userId._id}`).emit("conversation:update", {
+        if (!p.userId) return;
+        const pId = p.userId._id || p.userId;
+        io.to(`user:${pId}`).emit("conversation:update", {
           conversationId: id,
           updates: { participants: formattedParticipants }
         });
-        if (memberIds.includes(p.userId._id.toString())) {
-          io.to(`user:${p.userId._id}`).emit("new-group", formattedConversation);
+        if (memberIds.includes(pId.toString())) {
+          io.to(`user:${pId}`).emit("new-group", formattedConversation);
         }
       });
     }
@@ -676,7 +710,9 @@ export const removeGroupMember = async (req, res) => {
     if (io) {
       io.to(`user:${memberId}`).emit("conversation:removed", { conversationId: id });
       conversation.participants.forEach(p => {
-        io.to(`user:${p.userId._id}`).emit("conversation:update", {
+        if (!p.userId) return;
+        const pId = p.userId._id || p.userId;
+        io.to(`user:${pId}`).emit("conversation:update", {
           conversationId: id,
           updates: { participants: formattedParticipants }
         });
@@ -734,7 +770,9 @@ export const updateGroupRole = async (req, res) => {
     const io = req.app.get("io");
     if (io) {
       conversation.participants.forEach(p => {
-        io.to(`user:${p.userId._id}`).emit("conversation:update", {
+        if (!p.userId) return;
+        const pId = p.userId._id || p.userId;
+        io.to(`user:${pId}`).emit("conversation:update", {
           conversationId: id,
           updates: { participants: formattedParticipants }
         });
@@ -963,11 +1001,12 @@ export const clearChatHistory = async (req, res) => {
       conversation.clearedAt = new Map();
     }
     conversation.clearedAt.set(userId.toString(), new Date());
+    conversation.markModified("clearedAt");
     await conversation.save();
 
     const io = req.app.get("io");
     if (io) {
-      io.to(`user:${userId}`).emit("conversation:clear", { conversationId: id });
+      io.to(`user:${userId}`).emit("conversation:remove", { conversationId: id });
     }
 
     return res.status(200).json({ message: "Xóa đoạn chat thành công" });
@@ -1031,7 +1070,9 @@ export const leaveGroup = async (req, res) => {
         }));
 
         conversation.participants.forEach((p) => {
-          io.to(`user:${p.userId._id}`).emit("conversation:update", {
+          if (!p.userId) return;
+          const pId = p.userId._id || p.userId;
+          io.to(`user:${pId}`).emit("conversation:update", {
             conversationId: id,
             updates: { participants: formattedParticipants }
           });
@@ -1242,9 +1283,14 @@ export const joinChannel = async (req, res) => {
     const io = req.app.get("io");
     if (io) {
       io.to(`user:${userId}`).emit("new-group", formattedConversation);
-      io.to(`conversation:${id}`).emit("conversation:update", {
-        conversationId: id,
-        updates: { participantsCount: conversation.participants.length }
+      
+      formattedConversation.participants.forEach(p => {
+        if (p._id && p._id.toString() !== userId.toString()) {
+          io.to(`user:${p._id}`).emit("conversation:update", {
+            conversationId: id,
+            updates: { participants: formattedParticipants }
+          });
+        }
       });
     }
 
@@ -1358,7 +1404,9 @@ export const banGroupMember = async (req, res) => {
       }));
 
       conversation.participants.forEach(p => {
-        io.to(`user:${p.userId._id}`).emit("conversation:update", {
+        if (!p.userId) return;
+        const pId = p.userId._id || p.userId;
+        io.to(`user:${pId}`).emit("conversation:update", {
           conversationId: id,
           updates: { participants: formattedParticipants }
         });
