@@ -1,0 +1,174 @@
+import express from "express";
+import dotenv from "dotenv";
+import http from "http";
+import { Server } from "socket.io";
+import { connectDB } from "./libs/db.js";
+import authRoute from "./routes/authRoute.js";
+import userRoute from "./routes/userRoute.js";
+import { getUserCount } from "./controllers/userController.js";
+import friendRoute from "./routes/friendRoute.js";
+import messageRoute from "./routes/messageRoute.js";
+import conversationRoute from "./routes/conversationRoute.js";
+import callRoute from "./routes/callRoute.js";
+import storyRoute from "./routes/storyRoute.js";
+import reviewRoute from "./routes/reviewRoute.js";
+import feedbackRoute from "./routes/feedbackRoute.js";
+import { registerCallSocketHandlers, activeGroupCalls, activeRoomCalls } from "./libs/callSocket.js";
+import cookieParser from "cookie-parser";
+import { protectedRoute } from "./middlewares/authMiddleware.js";
+import cors from "cors";
+import jwt from "jsonwebtoken";
+import { seedNexusAIUser } from "./utils/seedNexusAI.js";
+import { startScheduleWorker } from "./services/scheduleWorker.js";
+import User from "./models/User.js";
+
+dotenv.config();
+
+const app = express();
+const PORT = process.env.PORT || 5001;
+const server = http.createServer(app);
+const io = new Server(server, {
+  cors: {
+    origin: process.env.CLIENT_URL || "http://localhost:5173",
+    credentials: true,
+    methods: ["GET", "POST"],
+  },
+  transports: ["websocket", "polling"],
+});
+
+app.set("io", io);
+
+// middlewares
+app.use(express.json());
+app.use(cookieParser());
+app.use(cors({ origin: process.env.CLIENT_URL || "http://localhost:5173", credentials: true }));
+
+// public routes
+app.use("/api/auth", authRoute);
+app.get("/api/users/count", getUserCount);
+app.use("/api/reviews", reviewRoute);
+app.use("/api/feedback", feedbackRoute);
+
+// private routes
+app.use(protectedRoute);
+app.use("/api/users", userRoute);
+app.use("/api/friends", friendRoute);
+app.use("/api/messages", messageRoute);
+app.use("/api/conversations", conversationRoute);
+app.use("/api/calls", callRoute);
+app.use("/api/stories", storyRoute);
+
+const onlineUsers = new Set();
+
+io.on("connection", (socket) => {
+  console.log(`Socket connected: ${socket.id}`);
+
+  // Trích xuất userId từ auth handshake hoặc từ JWT token
+  let userId = socket.handshake.auth?.userId || socket.handshake.query?.userId;
+
+  if (!userId && socket.handshake.auth?.token) {
+    try {
+      const token = socket.handshake.auth.token;
+      const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+      if (decoded && typeof decoded === "object" && decoded.userId) {
+        userId = decoded.userId;
+      }
+    } catch (err) {
+      console.warn("[Socket] Không thể giải mã token để lấy userId:", err.message);
+    }
+  }
+
+  if (userId) {
+    socket.data.userId = userId;
+    socket.join(`user:${userId}`);
+    console.log(`Socket ${socket.id} joined personal room user:${userId}`);
+
+    onlineUsers.add(userId);
+    User.findByIdAndUpdate(userId, { lastActiveAt: new Date() }).catch(() => { });
+    io.emit("online-users", Array.from(onlineUsers));
+  }
+
+  socket.on("join-conversation", (conversationId) => {
+    if (conversationId) {
+      socket.join(conversationId);
+      console.log(`Socket ${socket.id} joined room ${conversationId}`);
+
+      // Gửi trạng thái cuộc gọi nhóm hiện tại nếu có
+      const activeCall = activeGroupCalls.get(conversationId);
+      if (activeCall) {
+        socket.emit("call:active_update", {
+          conversationId,
+          roomName: activeCall.roomName,
+          isVideo: activeCall.isVideo,
+          active: true
+        });
+      }
+
+      // Gửi trạng thái các phòng thoại (Voice Rooms) đang hoạt động
+      for (const [roomKey, participants] of activeRoomCalls.entries()) {
+        const [cId, roomId] = roomKey.split(':');
+        if (cId === conversationId && participants.size > 0) {
+          socket.emit("room_call:active_update", {
+            conversationId,
+            roomId,
+            participants: Array.from(participants)
+          });
+        }
+      }
+    }
+  });
+
+  socket.on("typing-start", ({ conversationId, participantIds }) => {
+    if (conversationId && userId && Array.isArray(participantIds)) {
+      participantIds.forEach(pId => {
+        if (pId !== userId) {
+          socket.to(`user:${pId}`).emit("typing-start", { conversationId, userId });
+        }
+      });
+    }
+  });
+
+  socket.on("typing-end", ({ conversationId, participantIds }) => {
+    if (conversationId && userId && Array.isArray(participantIds)) {
+      participantIds.forEach(pId => {
+        if (pId !== userId) {
+          socket.to(`user:${pId}`).emit("typing-end", { conversationId, userId });
+        }
+      });
+    }
+  });
+
+  // Đăng ký handlers cho cuộc gọi
+  registerCallSocketHandlers(io, socket);
+
+  socket.on("disconnect", async (reason) => {
+    console.log(`Socket disconnected: ${socket.id} (${reason})`);
+    if (userId) {
+      const userSockets = await io.in(`user:${userId}`).fetchSockets();
+      if (userSockets.length === 0) {
+        onlineUsers.delete(userId);
+        const lastActiveAt = new Date();
+        try {
+          await User.findByIdAndUpdate(userId, { lastActiveAt });
+        } catch (err) {
+          console.error("Error updating lastActiveAt on disconnect", err);
+        }
+        io.emit("online-users", Array.from(onlineUsers));
+        io.emit("user:last-active", { userId, lastActiveAt });
+      } else {
+        console.log(`User ${userId} still has ${userSockets.length} active sockets.`);
+      }
+    }
+  });
+});
+
+connectDB().then(async () => {
+  await seedNexusAIUser();
+  startScheduleWorker(io);
+  server.listen(PORT, () => {
+    console.log(`server bắt đầu trên cổng ${PORT}`);
+    console.log(`Socket.IO đang lắng nghe trên cổng ${PORT}`);
+  });
+});
+console.log(`server bắt đầu trên cổng ${PORT}`);
+console.log(`Socket.IO đang lắng nghe trên cổng ${PORT}`);

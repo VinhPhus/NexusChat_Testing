@@ -1,0 +1,659 @@
+import { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
+import { Shield, Bell, ShieldBan, KeyRound, Loader2, Mail, RotateCcw, X, UserX, Trash2, CheckCircle2, AlertTriangle, Eye, ChevronRight } from "lucide-react";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+import { useAuthStore } from "@/stores/useAuthStore";
+import { useUserStore } from "@/stores/useUserStore";
+import { userService } from "@/services/userService";
+import UserAvatar from "../chat/UserAvatar";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { toast } from "sonner";
+import { cn } from "@/lib/utils";
+
+interface BlockedUser {
+  _id: string;
+  displayName: string;
+  username: string;
+  avatarUrl?: string | null;
+}
+
+const PrivacySettings = () => {
+  const { user, sendOtp, changePassword, deleteAccount, unblockUser } = useAuthStore();
+  const { toggleReadReceipts } = useUserStore();
+
+  const isNotificationSupported = typeof window !== "undefined" && "Notification" in window;
+
+  // Notification State
+  const [notificationsEnabled, setNotificationsEnabled] = useState<boolean>(() => {
+    if (typeof window === "undefined" || !("Notification" in window)) return false;
+    try {
+      return localStorage.getItem("desktop_notifications") !== "disabled" && window.Notification.permission === "granted";
+    } catch {
+      return false;
+    }
+  });
+
+  // Modals visibility
+  const [showBlockedModal, setShowBlockedModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+
+  // Change Password State (Inline)
+  const [changePwStep, setChangePwStep] = useState<1 | 2>(1);
+  const [pwOtp, setPwOtp] = useState("");
+  const [newPw, setNewPw] = useState("");
+  const [confirmPw, setConfirmPw] = useState("");
+  const [pwTimer, setPwTimer] = useState(0);
+  const [isPwLoading, setIsPwLoading] = useState(false);
+
+  // Blocked Users List State
+  const [blockedUsersList, setBlockedUsersList] = useState<BlockedUser[]>([]);
+  const [isFetchingBlocked, setIsFetchingBlocked] = useState(false);
+
+  // Delete Account State
+  const [deleteStep, setDeleteStep] = useState<1 | 2>(1);
+  const [deleteOtp, setDeleteOtp] = useState("");
+  const [deleteTimer, setDeleteTimer] = useState(0);
+  const [isDeleteLoading, setIsDeleteLoading] = useState(false);
+
+  // Timers
+  useEffect(() => {
+    if (pwTimer <= 0) return;
+    const interval = setInterval(() => setPwTimer((prev) => prev - 1), 1000);
+    return () => clearInterval(interval);
+  }, [pwTimer]);
+
+  useEffect(() => {
+    if (deleteTimer <= 0) return;
+    const interval = setInterval(() => setDeleteTimer((prev) => prev - 1), 1000);
+    return () => clearInterval(interval);
+  }, [deleteTimer]);
+
+  // Handle Desktop Notification Toggle
+  const handleToggleNotifications = async () => {
+    if (!isNotificationSupported) {
+      toast.error("Trình duyệt hoặc thiết bị của bạn không hỗ trợ thông báo đẩy!");
+      return;
+    }
+
+    if (!notificationsEnabled) {
+      if (Notification.permission === "default") {
+        try {
+          const perm = await Notification.requestPermission();
+          if (perm === "granted") {
+            setNotificationsEnabled(true);
+            localStorage.setItem("desktop_notifications", "enabled");
+            toast.success("Đã bật thông báo trình duyệt");
+          } else {
+            toast.error("Vui lòng cấp quyền thông báo trong cài đặt trình duyệt!");
+          }
+        } catch {
+          Notification.requestPermission((perm) => {
+            if (perm === "granted") {
+              setNotificationsEnabled(true);
+              localStorage.setItem("desktop_notifications", "enabled");
+              toast.success("Đã bật thông báo trình duyệt");
+            } else {
+              toast.error("Vui lòng cấp quyền thông báo trong cài đặt trình duyệt!");
+            }
+          });
+        }
+      } else if (Notification.permission === "denied") {
+        toast.error("Vui lòng cấp quyền thông báo trong cài đặt trình duyệt!");
+      } else {
+        setNotificationsEnabled(true);
+        localStorage.setItem("desktop_notifications", "enabled");
+        toast.success("Đã bật thông báo trình duyệt");
+      }
+    } else {
+      localStorage.setItem("desktop_notifications", "disabled");
+      setNotificationsEnabled(false);
+      toast.info("Đã tắt thông báo đẩy trình duyệt.");
+    }
+  };
+
+  const handleToggleReadReceipts = async () => {
+    if (user) {
+      await toggleReadReceipts(!user.readReceipts);
+    }
+  };
+
+  // Change Password Handlers
+  const handleSendPwOtp = async (e?: React.MouseEvent) => {
+    e?.preventDefault();
+    e?.stopPropagation();
+    if (!user?.email) return;
+    try {
+      setIsPwLoading(true);
+      await sendOtp(user.email, "change_password");
+      setChangePwStep(2);
+      setPwTimer(60);
+    } catch {
+      // error handled in store
+    } finally {
+      setIsPwLoading(false);
+    }
+  };
+
+  const handleConfirmChangePassword = async () => {
+    if (!pwOtp || pwOtp.trim().length !== 6) {
+      toast.error("Vui lòng nhập đủ 6 chữ số mã OTP!");
+      return;
+    }
+    if (!newPw || newPw.length < 6) {
+      toast.error("Mật khẩu mới phải có ít nhất 6 ký tự!");
+      return;
+    }
+    if (newPw !== confirmPw) {
+      toast.error("Mật khẩu xác nhận không khớp!");
+      return;
+    }
+
+    try {
+      setIsPwLoading(true);
+      await changePassword(pwOtp.trim(), newPw);
+      setChangePwStep(1);
+      setPwOtp("");
+      setNewPw("");
+      setConfirmPw("");
+    } catch {
+      // error handled in store
+    } finally {
+      setIsPwLoading(false);
+    }
+  };
+
+  // Open Blocked Users Modal & Fetch List
+  const handleOpenBlockedModal = async () => {
+    setShowBlockedModal(true);
+    try {
+      setIsFetchingBlocked(true);
+      const list = await userService.getBlockedUsers();
+      setBlockedUsersList(list);
+    } catch (error) {
+      console.error("Lỗi lấy danh sách chặn:", error);
+      toast.error("Không thể tải danh sách chặn");
+    } finally {
+      setIsFetchingBlocked(false);
+    }
+  };
+
+  // Unblock Handler inside Modal
+  const handleUnblockUser = async (targetId: string) => {
+    try {
+      await unblockUser(targetId);
+      setBlockedUsersList((prev) => prev.filter((u) => u._id !== targetId));
+    } catch {
+      // error handled in store
+    }
+  };
+
+  // Delete Account Handlers
+  const handleSendDeleteOtp = async (e?: React.MouseEvent) => {
+    e?.preventDefault();
+    e?.stopPropagation();
+    if (!user?.email) return;
+    try {
+      setIsDeleteLoading(true);
+      await sendOtp(user.email, "delete_account");
+      setDeleteStep(2);
+      setDeleteTimer(60);
+    } catch {
+      // error handled in store
+    } finally {
+      setIsDeleteLoading(false);
+    }
+  };
+
+  const handleConfirmDeleteAccount = async () => {
+    if (!deleteOtp || deleteOtp.trim().length !== 6) {
+      toast.error("Vui lòng nhập đủ 6 chữ số mã OTP!");
+      return;
+    }
+
+    try {
+      setIsDeleteLoading(true);
+      await deleteAccount(deleteOtp.trim());
+      setShowDeleteModal(false);
+      window.location.href = "/signup";
+    } catch {
+      // error handled in store
+    } finally {
+      setIsDeleteLoading(false);
+    }
+  };
+
+  return (
+    <Card className="glass-strong border-border/30 rounded-3xl shadow-xl">
+      <CardHeader className="pb-4">
+        <CardTitle className="flex items-center gap-2.5 text-base sm:text-lg">
+          <div className="p-2 rounded-xl bg-purple-500/10 text-purple-400 border border-purple-500/20">
+            <Shield className="h-4.5 w-4.5" />
+          </div>
+          <div>
+            <span>Quyền riêng tư & Bảo mật</span>
+            <CardDescription className="text-xs mt-0.5">
+              Quản lý bảo mật tài khoản và cài đặt quyền riêng tư
+            </CardDescription>
+          </div>
+        </CardTitle>
+      </CardHeader>
+
+      <CardContent className="space-y-4 pt-2">
+        {/* ========================================================= */}
+        {/* SECTION 1: CÀI ĐẶT THÔNG BÁO VÀ ĐÃ XEM (ĐỒNG BỘ VỚI SWITCH) */}
+        {/* ========================================================= */}
+        <div className="flex items-center justify-between p-3.5 rounded-2xl bg-muted/30 border border-border/40 hover:border-purple-500/30 transition-colors">
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-xl bg-indigo-500/10 text-indigo-400 shrink-0">
+              <Bell className="h-4 w-4" />
+            </div>
+            <div>
+              <Label htmlFor="notification-toggle" className="text-xs sm:text-sm font-semibold cursor-pointer">
+                Thông báo trình duyệt
+              </Label>
+              <p className="text-[11px] text-muted-foreground mt-0.5">
+                Nhận thông báo khi có tin nhắn mới dù đang ẩn tab
+              </p>
+            </div>
+          </div>
+          <Switch
+            id="notification-toggle"
+            checked={notificationsEnabled}
+            onCheckedChange={handleToggleNotifications}
+            disabled={!isNotificationSupported}
+            className="data-[state=checked]:bg-purple-600 shrink-0"
+          />
+        </div>
+
+        <div className="flex items-center justify-between p-3.5 rounded-2xl bg-muted/30 border border-border/40 hover:border-purple-500/30 transition-colors">
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-xl bg-sky-500/10 text-sky-400 shrink-0">
+              <Eye className="h-4 w-4" />
+            </div>
+            <div>
+              <Label htmlFor="read-receipts-toggle" className="text-xs sm:text-sm font-semibold cursor-pointer">
+                Hiển thị "Đã xem" (Read receipts)
+              </Label>
+              <p className="text-[11px] text-muted-foreground mt-0.5">
+                Cho phép người khác thấy khi bạn đã đọc tin nhắn
+              </p>
+            </div>
+          </div>
+          <Switch
+            id="read-receipts-toggle"
+            checked={Boolean(user?.readReceipts)}
+            onCheckedChange={handleToggleReadReceipts}
+            className="data-[state=checked]:bg-purple-600 shrink-0"
+          />
+        </div>
+
+        {/* ========================================================= */}
+        {/* SECTION 2: ĐỔI MẬT KHẨU TÀI KHOẢN                           */}
+        {/* ========================================================= */}
+        <div className="p-4 rounded-2xl bg-muted/30 border border-border/40 space-y-3">
+          <div className="flex items-center justify-between">
+            <h4 className="font-semibold text-xs sm:text-sm flex items-center gap-2 text-foreground">
+              <div className="p-1.5 rounded-lg bg-purple-500/10 text-purple-400">
+                <KeyRound className="w-3.5 h-3.5" />
+              </div>
+              <span>Đổi mật khẩu tài khoản</span>
+            </h4>
+            <span className="text-[10px] text-purple-400/90 font-medium px-2 py-0.5 rounded-full bg-purple-500/10 border border-purple-500/20">
+              OTP Gmail
+            </span>
+          </div>
+
+          {changePwStep === 1 ? (
+            <div className="flex items-center justify-between pt-1 gap-2">
+              <span className="text-xs text-muted-foreground truncate">
+                Email nhận mã: <strong className="text-foreground font-medium">{user?.email}</strong>
+              </span>
+              <Button
+                type="button"
+                onClick={handleSendPwOtp}
+                disabled={isPwLoading}
+                size="sm"
+                className="h-8 text-xs bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white gap-1.5 font-medium shrink-0 rounded-xl shadow-xs"
+              >
+                {isPwLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Mail className="w-3.5 h-3.5" />}
+                <span>Gửi mã OTP</span>
+              </Button>
+            </div>
+          ) : (
+            <div className="space-y-3 pt-1 animate-in fade-in duration-200">
+              <div className="p-2.5 rounded-xl bg-purple-950/30 border border-purple-500/30 text-xs text-purple-200 flex items-center justify-between">
+                <span>Mã OTP 6 số đã gửi tới <strong>{user?.email}</strong></span>
+                <button
+                  type="button"
+                  disabled={pwTimer > 0 || isPwLoading}
+                  onClick={handleSendPwOtp}
+                  className={cn("flex items-center gap-1 text-[11px] font-medium", pwTimer > 0 ? "text-muted-foreground" : "text-purple-400 hover:underline")}
+                >
+                  <RotateCcw className={cn("w-3 h-3", isPwLoading && "animate-spin")} />
+                  <span>{pwTimer > 0 ? `Gửi lại (${pwTimer}s)` : "Gửi lại OTP"}</span>
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                <div className="space-y-1">
+                  <Label htmlFor="inline-pw-otp" className="text-[10px] uppercase text-muted-foreground font-semibold">Mã OTP (6 số)</Label>
+                  <Input
+                    id="inline-pw-otp"
+                    type="text"
+                    maxLength={6}
+                    placeholder="123456"
+                    value={pwOtp}
+                    onChange={(e) => setPwOtp(e.target.value.replace(/\D/g, ""))}
+                    className="h-8.5 text-xs text-center font-bold tracking-[4px] bg-background/80 border-purple-500/40 focus:border-purple-500 rounded-xl"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <Label htmlFor="inline-new-pw" className="text-[10px] uppercase text-muted-foreground font-semibold">Mật khẩu mới</Label>
+                  <Input
+                    id="inline-new-pw"
+                    type="password"
+                    placeholder="••••••••"
+                    value={newPw}
+                    onChange={(e) => setNewPw(e.target.value)}
+                    className="h-8.5 text-xs bg-background/80 rounded-xl"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <Label htmlFor="inline-confirm-pw" className="text-[10px] uppercase text-muted-foreground font-semibold">Xác nhận mật khẩu</Label>
+                  <Input
+                    id="inline-confirm-pw"
+                    type="password"
+                    placeholder="••••••••"
+                    value={confirmPw}
+                    onChange={(e) => setConfirmPw(e.target.value)}
+                    className="h-8.5 text-xs bg-background/80 rounded-xl"
+                  />
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-2 pt-1">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setChangePwStep(1)}
+                  className="h-8 text-xs rounded-xl"
+                >
+                  Hủy
+                </Button>
+                <Button
+                  type="button"
+                  size="sm"
+                  onClick={handleConfirmChangePassword}
+                  disabled={isPwLoading || pwOtp.length !== 6 || !newPw || !confirmPw}
+                  className="h-8 text-xs bg-purple-600 hover:bg-purple-700 text-white gap-1.5 font-medium rounded-xl shadow-md shadow-purple-600/20"
+                >
+                  {isPwLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <CheckCircle2 className="w-3.5 h-3.5" />}
+                  <span>Lưu mật khẩu mới</span>
+                </Button>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* ========================================================= */}
+        {/* SECTION 3: DANH SÁCH CHẶN                                 */}
+        {/* ========================================================= */}
+        <div
+          onClick={handleOpenBlockedModal}
+          className="flex items-center justify-between p-3.5 rounded-2xl bg-muted/30 border border-border/40 hover:border-purple-500/40 hover:bg-muted/50 transition-all cursor-pointer group"
+        >
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-xl bg-rose-500/10 text-rose-400 shrink-0">
+              <ShieldBan className="h-4 w-4" />
+            </div>
+            <div>
+              <span className="text-xs sm:text-sm font-semibold">Danh sách người dùng đã chặn</span>
+              <p className="text-[11px] text-muted-foreground mt-0.5">
+                Quản lý các tài khoản bạn đã chặn gửi tin nhắn
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-[11px] px-2.5 py-0.5 rounded-full bg-rose-500/10 text-rose-400 border border-rose-500/20 font-medium">
+              {user?.blockedUsers?.length || 0} người
+            </span>
+            <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:translate-x-0.5 transition-transform" />
+          </div>
+        </div>
+
+        {/* ========================================================= */}
+        {/* SECTION 4: KHU VỰC NGUY HIỂM - XOÁ TÀI KHOẢN             */}
+        {/* ========================================================= */}
+        <div className="pt-2 border-t border-border/30">
+          <div className="flex items-center justify-between p-3.5 rounded-2xl bg-rose-500/5 border border-rose-500/20">
+            <div>
+              <span className="text-xs sm:text-sm font-semibold text-rose-400 flex items-center gap-1.5">
+                <AlertTriangle className="w-3.5 h-3.5" /> Xóa tài khoản
+              </span>
+              <p className="text-[11px] text-muted-foreground mt-0.5">
+                Xóa vĩnh viễn tài khoản và toàn bộ dữ liệu trò chuyện
+              </p>
+            </div>
+            <Button
+              variant="destructive"
+              size="sm"
+              onClick={() => {
+                setShowDeleteModal(true);
+                setDeleteStep(1);
+              }}
+              className="h-8 text-xs bg-rose-600 hover:bg-rose-700 text-white font-medium rounded-xl gap-1.5 shadow-sm shadow-rose-600/20 shrink-0"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+              <span>Xóa vĩnh viễn</span>
+            </Button>
+          </div>
+        </div>
+      </CardContent>
+
+      {/* ========================================================= */}
+      {/* MODAL DANH SÁCH CHẶN (RADIX DIALOG)                        */}
+      {/* ========================================================= */}
+      <Dialog open={showBlockedModal} onOpenChange={setShowBlockedModal}>
+        <DialogContent
+          showCloseButton={false}
+          aria-describedby={undefined}
+          className="w-full max-w-md bg-card border border-purple-500/30 rounded-3xl p-6 shadow-2xl space-y-4 text-foreground max-h-[80vh] flex flex-col gap-0 outline-none"
+        >
+          <div className="flex items-center justify-between border-b border-border/40 pb-3">
+            <div className="flex items-center gap-2.5">
+              <div className="p-2 rounded-xl bg-rose-500/10 text-rose-400 border border-rose-500/20">
+                <ShieldBan className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="font-bold text-base tracking-tight">Danh sách chặn</h3>
+                <p className="text-[11px] text-muted-foreground">Quản lý những người bạn đã chặn</p>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => setShowBlockedModal(false)}
+              className="p-1.5 rounded-xl text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+
+          <div className="overflow-y-auto flex-1 space-y-2 pr-1 min-h-[160px]">
+            {isFetchingBlocked ? (
+              <div className="flex flex-col items-center justify-center h-40 gap-2 text-muted-foreground text-xs">
+                <Loader2 className="w-6 h-6 animate-spin text-purple-500" />
+                <span>Đang tải danh sách chặn...</span>
+              </div>
+            ) : blockedUsersList.length === 0 ? (
+              <div className="flex flex-col items-center justify-center h-40 gap-2 text-muted-foreground text-xs">
+                <UserX className="w-8 h-8 opacity-40 text-rose-400" />
+                <span>Chưa có người dùng nào bị chặn.</span>
+              </div>
+            ) : (
+              blockedUsersList.map((blocked) => (
+                <div
+                  key={blocked._id}
+                  className="flex items-center justify-between p-3 rounded-2xl bg-muted/40 border border-border/50 hover:border-purple-500/30 transition-colors"
+                >
+                  <div className="flex items-center gap-3">
+                    <UserAvatar
+                      type="chat"
+                      name={blocked.displayName}
+                      avatarUrl={blocked.avatarUrl || undefined}
+                      className="w-10 h-10"
+                    />
+                    <div className="flex flex-col">
+                      <span className="font-semibold text-xs">{blocked.displayName}</span>
+                      <span className="text-[10px] text-muted-foreground">@{blocked.username}</span>
+                    </div>
+                  </div>
+
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleUnblockUser(blocked._id)}
+                    className="h-8 text-xs rounded-xl border-rose-500/30 text-rose-400 hover:bg-rose-500/10 hover:text-rose-300"
+                  >
+                    Bỏ chặn
+                  </Button>
+                </div>
+              ))
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* ========================================================= */}
+      {/* MODAL XOÁ TÀI KHOẢN (RADIX DIALOG)                         */}
+      {/* ========================================================= */}
+      <Dialog open={showDeleteModal} onOpenChange={setShowDeleteModal}>
+        <DialogContent
+          showCloseButton={false}
+          aria-describedby={undefined}
+          className="w-full max-w-md bg-card border border-rose-500/40 rounded-3xl p-6 shadow-2xl space-y-4 text-foreground flex flex-col gap-0 outline-none"
+        >
+          <div className="flex items-center justify-between border-b border-border/40 pb-3">
+            <div className="flex items-center gap-2.5">
+              <div className="p-2 rounded-xl bg-rose-500/10 text-rose-500 border border-rose-500/20">
+                <Trash2 className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="font-bold text-base tracking-tight text-rose-500">Xoá tài khoản vĩnh viễn</h3>
+                <p className="text-[11px] text-muted-foreground">Cần xác thực mã OTP gửi về Gmail</p>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => setShowDeleteModal(false)}
+              className="p-1.5 rounded-xl text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+
+          <div className="p-3.5 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs space-y-1">
+            <p className="font-semibold flex items-center gap-1.5">
+              <AlertTriangle className="w-4 h-4 text-rose-400 flex-shrink-0" />
+              Cảnh báo quan trọng:
+            </p>
+            <p className="text-[11px] opacity-90 leading-relaxed">
+              Tài khoản của bạn sẽ bị xóa hoàn toàn khỏi hệ thống. Sau khi xóa, địa chỉ Gmail <strong>{user?.email}</strong> và Username của bạn sẽ có thể dùng để đăng ký tài khoản mới.
+            </p>
+          </div>
+
+          {deleteStep === 1 ? (
+            <div className="space-y-4 pt-1">
+              <p className="text-xs text-muted-foreground">
+                Bấm nút bên dưới để nhận mã OTP 6 chữ số về email: <strong className="text-foreground">{user?.email}</strong>
+              </p>
+              <div className="flex gap-2 pt-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setShowDeleteModal(false)}
+                  className="flex-1 h-9 rounded-xl text-xs"
+                >
+                  Hủy
+                </Button>
+                <Button
+                  type="button"
+                  onClick={handleSendDeleteOtp}
+                  disabled={isDeleteLoading}
+                  className="flex-1 h-9 rounded-xl text-xs bg-rose-600 hover:bg-rose-700 text-white gap-2 font-medium"
+                >
+                  {isDeleteLoading ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <span>Đang gửi...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Mail className="w-4 h-4" />
+                      <span>Gửi OTP xóa tài khoản</span>
+                    </>
+                  )}
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-3 pt-1">
+              <div className="space-y-1">
+                <Label htmlFor="delete-otp" className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                  Mã OTP 6 chữ số xác nhận
+                </Label>
+                <Input
+                  id="delete-otp"
+                  type="text"
+                  maxLength={6}
+                  placeholder="123456"
+                  value={deleteOtp}
+                  onChange={(e) => setDeleteOtp(e.target.value.replace(/\D/g, ""))}
+                  className="h-10 rounded-xl bg-background/80 border-rose-500/40 text-center font-bold tracking-[6px] text-sm focus:border-rose-500"
+                />
+              </div>
+
+              <div className="flex items-center justify-between text-xs pt-1">
+                <button
+                  type="button"
+                  disabled={deleteTimer > 0 || isDeleteLoading}
+                  onClick={handleSendDeleteOtp}
+                  className={cn(
+                    "flex items-center gap-1 font-medium text-[11px]",
+                    deleteTimer > 0 ? "text-muted-foreground cursor-not-allowed" : "text-rose-400 hover:underline"
+                  )}
+                >
+                  <RotateCcw className={cn("w-3 h-3", isDeleteLoading && "animate-spin")} />
+                  <span>{deleteTimer > 0 ? `Gửi lại sau (${deleteTimer}s)` : "Gửi lại OTP"}</span>
+                </button>
+              </div>
+
+              <Button
+                type="button"
+                onClick={handleConfirmDeleteAccount}
+                disabled={isDeleteLoading || deleteOtp.length !== 6}
+                className="w-full h-10 bg-rose-600 hover:bg-rose-700 text-white font-semibold text-xs gap-2 mt-2 rounded-xl"
+              >
+                {isDeleteLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
+                <span>Xác nhận xóa tài khoản vĩnh viễn</span>
+              </Button>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+    </Card>
+  );
+};
+
+export default PrivacySettings;

@@ -1,0 +1,184 @@
+import mongoose from "mongoose";
+
+
+// Cấu trúc của user trong cuộc trò chuyện
+const participantSchema = new mongoose.Schema(
+  {
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+    joinedAt: {
+      type: Date,
+      default: Date.now,
+    },
+    role: {
+      type: String,
+      enum: ["member", "leader", "deputy"],
+      default: "member",
+    },
+  },
+  {
+    _id: false,
+  }
+);
+
+
+// Cấu trúc phòng thoại
+const voiceRoomSchema = new mongoose.Schema({
+  name: { type: String, required: true },
+  createdAt: { type: Date, default: Date.now },
+});
+
+// Cấu trúc nhóm trong cuộc trò chuyện nhóm
+const groupSchema = new mongoose.Schema(
+  {
+    name: {
+      type: String,
+      trim: true,
+    },
+    createdBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
+    avatar: {
+      type: String,
+      default: null,
+    },
+    avatarId: {
+      type: String,
+      default: null,
+    },
+    description: {
+      type: String,
+      default: null,
+    },
+    voiceRooms: {
+      type: [voiceRoomSchema],
+      default: () => [{ name: "Phòng chung" }]
+    },
+  },
+  {
+    _id: false,
+  }
+);
+
+
+// Cấu trúc tin nhắn cuối cùng trong cuộc trò chuyện
+const lastMessageSchema = new mongoose.Schema(
+  {
+    _id: { type: String },
+    content: {
+      type: String,
+      default: null,
+    },
+    senderId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
+    createdAt: {
+      type: Date,
+      default: null,
+    },
+  },
+  {
+    _id: false,
+  }
+);
+
+
+// Cấu trúc cuộc trò chuyện
+const conversationSchema = new mongoose.Schema(
+  {
+    type: {
+      type: String,
+      enum: ["direct", "group", "community", "channel"],
+      required: true,
+    },
+    isPublic: {
+      type: Boolean,
+      default: false,
+    },
+    participants: {
+      type: [participantSchema],
+      required: true,
+    },
+    group: {
+      type: groupSchema,
+    },
+    lastMessageAt: {
+      type: Date,
+    },
+    seenBy: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ],
+    lastMessage: {
+      type: lastMessageSchema,
+      default: null,
+    },
+    unreadCounts: {
+      type: Map,
+      of: Number,
+      default: {},
+    },
+    streak: {
+      count: { type: Number, default: 0 },
+      lastMessageDate: { type: Date, default: null },
+      senders: { type: [String], default: [] },
+      isBothMessaged: { type: Boolean, default: false }
+    },
+    wallpaper: {
+      type: String,
+      default: "default",
+    },
+    nicknames: {
+      type: Map,
+      of: String,
+      default: {},
+    },
+    clearedAt: {
+      type: Map,
+      of: Date,
+      default: {},
+    },
+    incognitoMode: {
+      isActive: { type: Boolean, default: false },
+      expiresAt: { type: Date, default: null },
+      startedAt: { type: Date, default: null },
+      startedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User", default: null },
+    },
+    bannedUsers: [
+      {
+        userId: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "User",
+          required: true,
+        },
+        expiresAt: {
+          type: Date, // null means permanent ban
+          default: null,
+        },
+        _id: false,
+      }
+    ],
+  },
+  {
+    timestamps: true,
+  }
+);
+
+
+// Tạo index để tối ưu truy vấn cuộc trò chuyện theo user và thời gian tin nhắn cuối
+conversationSchema.index({
+  "participant.userId": 1,
+  lastMessageAt: -1,
+});
+
+// có thể thêm các trường để tạo thông tin cho nhóm như ảnh và mô tả nhóm này để làm sau
+
+const Conversation = mongoose.model("Conversation", conversationSchema);
+export default Conversation;

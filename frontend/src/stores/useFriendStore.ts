@@ -1,0 +1,137 @@
+import { friendService } from "@/services/friendService";
+import type { FriendState } from "@/types/store";
+import { create } from "zustand";
+
+export const useFriendStore = create<FriendState>((set, get) => ({
+  friends: [],
+  loading: false,
+  receivedList: [],
+  sentList: [],
+  searchByUsername: async (username) => {
+    try {
+      set({ loading: true });
+
+      const users = await friendService.searchByUsername(username);
+      set({ loading: false });
+      return users;
+    } catch (error) {
+      set({ loading: false });
+      return [];
+    }
+  },
+  addFriend: async (to, message) => {
+    try {
+      set({ loading: true });
+      const resultMessage = await friendService.sendFriendRequest(to, message);
+      await get().getAllFriendRequests();
+      return resultMessage;
+    } catch (error) {
+      console.error("Lỗi xảy ra khi addFriend", error);
+      throw error;
+    } finally {
+      set({ loading: false });
+    }
+  },
+  getAllFriendRequests: async () => {
+    try {
+      set({ loading: true });
+
+      const result = await friendService.getAllFriendRequest();
+
+      if (!result) return;
+
+      const { received, sent } = result;
+
+      set({ receivedList: received, sentList: sent });
+    } catch (error) {
+      console.error("Lỗi xảy ra khi getAllFriendRequests", error);
+    } finally {
+      set({ loading: false });
+    }
+  },
+  acceptRequest: async (requestId) => {
+    try {
+      set({ loading: true });
+      await friendService.acceptRequest(requestId);
+
+      set((state) => ({
+        receivedList: state.receivedList.filter((r) => r._id !== requestId),
+      }));
+    } catch (error) {
+      console.error("Lỗi xảy ra khi acceptRequest", error);
+    }
+  },
+  declineRequest: async (requestId) => {
+    try {
+      set({ loading: true });
+      await friendService.declineRequest(requestId);
+
+      set((state) => ({
+        receivedList: state.receivedList.filter((r) => r._id !== requestId),
+      }));
+    } catch (error) {
+      console.error("Lỗi xảy ra khi declineRequest", error);
+    } finally {
+      set({ loading: false });
+    }
+  },
+  cancelRequest: async (requestId) => {
+    try {
+      set({ loading: true });
+      await friendService.declineRequest(requestId);
+      set((state) => ({
+        sentList: state.sentList.filter((r) => r._id !== requestId),
+      }));
+    } catch (error) {
+      console.error("Lỗi xảy ra khi cancelRequest", error);
+    } finally {
+      set({ loading: false });
+    }
+  },
+  getFriends: async () => {
+    try {
+      set({ loading: true });
+      const friends = await friendService.getFriendList();
+      set({ friends: friends });
+    } catch (error) {
+      console.error("Lỗi xảy ra khi load friends", error);
+      set({ friends: [] });
+    } finally {
+      set({ loading: false });
+    }
+  },
+  removeFriend: async (friendId) => {
+    try {
+      set({ loading: true });
+      await friendService.removeFriend(friendId);
+      set((state) => ({
+        friends: state.friends.filter((f) => f._id !== friendId),
+      }));
+
+      import("./useChatStore").then((mod) => {
+        const store = mod.useChatStore.getState();
+        const convo = store.conversations.find((c) =>
+          c.type === "direct" && c.participants?.some((p) => p._id === friendId)
+        );
+        if (convo) {
+          store.updateConversation({
+            _id: convo._id,
+            streak: { count: 0, lastMessageDate: null, senders: [], isBothMessaged: false },
+          });
+        }
+      });
+    } catch (error) {
+      console.error("Lỗi xảy ra khi xóa bạn bè", error);
+      throw error;
+    } finally {
+      set({ loading: false });
+    }
+  },
+  updateFriendData: (updatedUser) => {
+    set((state) => ({
+      friends: state.friends.map((f) =>
+        f._id === updatedUser._id ? { ...f, ...updatedUser } : f
+      ),
+    }));
+  },
+}));

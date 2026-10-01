@@ -1,0 +1,495 @@
+# NexusChat - Project Specification
+
+**Document Generated**: August 23, 2026
+**Version**: 1.5.0
+**Status**: Active Development
+
+---
+
+## 1. Project Overview
+
+NexusChat is a web-based messaging application for social communication. The current implementation focuses on a chat MVP with authentication, friend requests, direct conversations, group conversations, conversation history, and real-time Video/Audio calls (1:1 and Group).
+
+### Main goals
+- Allow users to sign up and sign in securely.
+- Support friendship management through friend requests.
+- Enable direct and group messaging.
+- Show conversations and message history in a chat UI.
+- Keep authentication state in the frontend using Zustand stores.
+- Provide premium, real-time Video & Audio calling (both 1:1 and Group) using LiveKit SFU and Socket.IO signaling.
+
+---
+
+## 2. Current Tech Stack
+
+### Backend
+| Technology | Version / Note | Purpose |
+|---|---|---|
+| Node.js | via Express runtime | Backend runtime |
+| Express.js | ^5.1.0 | Web server and routing |
+| MongoDB | via Mongoose | Database |
+| Mongoose | ^8.19.0 | ODM for MongoDB |
+| JWT | jsonwebtoken ^9.0.2 | Access token generation |
+| bcrypt | ^6.0.0 | Password hashing |
+| cookie-parser | ^1.4.7 | Parse refresh-token cookies |
+| cors | ^2.8.5 | Cross-origin request handling |
+| dotenv | ^17.2.3 | Environment variables |
+| nodemon | ^3.1.10 | Development auto-reload |
+| livekit-server-sdk | ^2.17.0 | Server token generation for LiveKit SFU |
+| cloudinary | ^2.0.0 | Image hosting for avatars |
+| multer | ^1.4.5 | File upload middleware |
+| @google/genai | ^0.1.2 | Gemini API SDK for AI Assistant |
+| @ai-sdk/google, @langchain/* | various | Vercel AI SDK & LangChain for advanced AI workflows |
+| nodemailer | ^6.10.1 | Email sending functionality |
+| node-cron / node-schedule | various | Task scheduling and cron jobs |
+| translate | ^3.1.0 | Text translation services |
+
+### Frontend
+| Technology | Version / Note | Purpose |
+|---|---|---|
+| React | ^19.2.0 | UI library |
+| TypeScript | ~5.9.3 | Static typing |
+| Vite | ^7.2.4 | Build tool and dev server |
+| React Router | ^7.10.1 / ^7.13.2 | Client-side routing |
+| Zustand | ^5.0.9 | State management |
+| Axios | ^1.13.2 | API client |
+| Tailwind CSS | ^4.1.17 | Styling |
+| React Hook Form | ^7.68.0 | Form handling |
+| Zod | ^4.1.13 | Form validation |
+| Radix UI | various | UI primitives |
+| lucide-react | ^0.555.0 | Icons |
+| sonner | ^2.0.7 | Toast notifications |
+| clsx / tailwind-merge | ^2.1.1 / ^3.4.0 | Utility class handling |
+| livekit-client | ^2.28.1 | WebRTC Media & SFU client |
+| @livekit/components-react | ^2.6.9 | LiveKit official React UI component set |
+| @livekit/components-styles | ^1.0.16 | LiveKit prebuilt styles |
+| @ai-sdk/react | ^4.0.71 | Vercel AI SDK React hooks |
+| antd / @mui/material | various | Component libraries for UI elements |
+| wavesurfer.js | ^7.12.11 | Audio waveform visualization |
+| react-konva / react-filerobot | various | Advanced image editing capabilities |
+| emoji-mart | ^5.6.0 | Emoji picker integration |
+
+### Root workspace
+- framer-motion ^12.38.0
+- tailwind-scrollbar ^4.0.2
+
+---
+
+## 3. Architecture
+
+The project is organized as a monorepo with two main parts:
+
+- Backend: Node.js + Express API
+- Frontend: React + TypeScript SPA
+
+### Request flow
+1. User signs in or signs up from the frontend.
+2. The frontend stores the access token in Zustand and sends it in the Authorization header.
+3. The backend verifies the token through auth middleware.
+4. Protected endpoints handle users, friends, messages, and conversations.
+5. Data is persisted in MongoDB through Mongoose models.
+
+### Real-time & Calling Architecture
+1. **Socket.IO Real-time Connection**:
+   - Built for signaling events (ringing, invite, accept, decline, end).
+   - Backend automatically assigns socket connections to a personal room (`user:${userId}`) using parsed JWT credentials from auth handshake.
+2. **SFU WebRTC Engine (LiveKit)**:
+   - When a call begins or is accepted, the backend generates an Access Token using `livekit-server-sdk`.
+   - The frontend connects to the LiveKit Server via `livekit-client` using the token, handling video/audio stream subscription and publishing automatically.
+
+### Current frontend routing
+- /signin
+- /signup
+- / (protected, main chat UI)
+
+### Current backend protection model
+- The server applies auth middleware globally to private routes using app.use(protectedRoute).
+- Public routes are mounted under /api/auth.
+
+---
+
+## 4. Current Folder Structure
+
+### Root
+- package.json
+- backend/
+- frontend/
+
+### Backend structure
+- backend/src/server.js
+- backend/src/controllers/
+   - authController.js
+   - userController.js
+   - friendController.js
+   - messageController.js
+   - conversationController.js
+   - callController.js
+   - feedbackController.js
+   - reviewController.js
+   - scheduledController.js
+   - storyController.js
+- backend/src/models/
+   - User.js
+   - Conversation.js
+   - Message.js
+   - Friend.js
+   - FriendRequest.js
+   - Session.js
+   - Feedback.js
+   - Review.js
+   - Otp.js
+   - ScheduledMessage.js
+   - Story.js
+- backend/src/routes/
+   - authRoute.js
+   - userRoute.js
+   - friendRoute.js
+   - messageRoute.js
+   - conversationRoute.js
+   - callRoute.js
+   - feedbackRoute.js
+   - reviewRoute.js
+   - storyRoute.js
+- backend/src/middlewares/
+   - authMiddleware.js
+   - friendMiddleware.js
+- backend/src/libs/db.js
+- backend/src/libs/callSocket.js
+- backend/src/utils/messageHelper.js
+
+### Frontend structure
+- frontend/src/App.tsx
+- frontend/src/pages/
+   - SignInPage.tsx
+   - SignUpPage.tsx
+   - ChatAppPage.tsx
+- frontend/src/components/
+   - auth/
+   - chat/
+   - friendRequest/
+   - newGroupChat/
+   - profile/
+   - sidebar/
+   - skeleton/
+   - ui/
+   - call/
+      - IncomingCallModal.tsx
+      - CallRoomModal.tsx
+- frontend/src/services/
+   - authService.ts
+   - chatService.ts
+   - friendService.ts
+   - userService.ts
+   - callService.ts
+- frontend/src/stores/
+   - useAuthStore.ts
+   - useChatStore.ts
+   - useFriendStore.ts
+   - useSocketStore.ts
+   - useThemeStore.ts
+   - useUserStore.ts
+   - useCallStore.ts
+   - useAccountInfoModalStore.ts
+   - useOfflineStore.ts
+   - useScheduleStore.ts
+   - useStoryStore.ts
+- frontend/src/types/
+   - chat.ts
+   - store.ts
+   - user.ts
+- frontend/src/lib/
+   - axios.ts
+   - utils.ts
+
+---
+
+## 5. Implemented Features
+
+### Authentication
+- User sign up
+- User sign in
+- JWT access token issuance
+- Refresh token stored in HttpOnly cookie
+- Sign out and clear refresh-token session
+- Protected route access through auth middleware
+- OTP-based verification via Email (Nodemailer)
+
+### User management
+- Get current authenticated user via /api/users/me
+- Basic user profile fields such as username, displayName, avatarUrl, coverUrl, email, bio, phone, note
+- Update user profile information, including uploading and managing user avatar and cover image
+- Mini Profile Sidebar to quickly view a friend's details
+- Real-time user presence tracking (online, offline, busy)
+
+### Friend management
+- Send friend requests
+- Accept or decline requests
+- View sent and received requests
+- List friends
+
+### Messaging
+- Send direct messages
+- Send group messages
+- Create direct or group conversations
+- Fetch conversation list
+- Fetch messages with pagination
+- Track unread counts and last message metadata per conversation
+- **Pin Messages**
+- **Recall Messages**
+- **Edit Messages**: Ability to edit sent messages.
+- **Delete for Me**: Ability to delete messages locally without affecting other participants.
+- **Incognito Mode (Chat Ẩn Danh)**: Secure 1:1 chat mode where messages expire and are wiped upon exiting the mode.
+- **Disappearing Messages** with customizable expiration timers (5 mins, 1 hour, 24 hours)
+- **View Once Media** for images and voice messages
+- **File Attachments**: Upload and share files via Google Drive integration.
+- **Polls**: Create and vote on polls in group chats.
+- **Voice Messages & Speech-to-Text**: Voice recording with real-time transcription capability.
+- **Chat Lock**: 4-digit PIN for sensitive conversations.
+- **Chat Wallpapers & Shared Nicknames**: Custom backgrounds and aliases.
+- **Block/Unblock Users**: Manage communication in direct conversations.
+- **Scheduled Messages**: Schedule messages to be sent automatically at a future time.
+- **Share Contact**: Easily share a friend's contact card directly inside a chat.
+- **Translation Integration**: In-app translation for messages using Google Translate API.
+- **Advanced Media Viewer & Image Editor**: Dedicated modals to view, zoom, and apply basic edits to images before sending.
+- **Offline Sync & Banner**: Graceful handling of network disconnects with an offline banner and sync store.
+- **Real-time synchronization**: Instant message delivery and conversation list updates via Socket.IO.
+- **@NexusAI Chatbot & Summarization**: Tích hợp trợ lý ảo thông minh sử dụng Gemini API (`@google/genai`).
+  - Cho phép người dùng gọi `@NexusAI` trong chat để trò chuyện, hỏi đáp. Bot sẽ đọc ngữ cảnh 15 tin nhắn gần nhất và tự động phản hồi lại vào đoạn chat.
+  - Cung cấp nút **Tóm tắt (Summarize)** sử dụng AI để phân tích và tóm tắt nhanh nội dung quan trọng của cuộc trò chuyện.
+- **Rich Text & Markdown**: Hỗ trợ hiển thị Markdown (`in đậm`, `in nghiêng`, `danh sách`, `code block`) giúp cho các tin nhắn trở nên rõ ràng và dễ đọc.
+- **Stories**: Users can share 24-hour expiring status updates (Stories).
+- **Feedback & Reviews**: Users can submit application feedback and leave reviews.
+
+### Group Management
+- **Role Management**: Distinguish between `leader` (Admin), `deputy`, and `member`.
+- **Leader Permissions**: Leaders can add members, kick/remove members, promote other members to leader/deputy, update group info, upload group avatar, and disband the group entirely.
+- **Member Permissions**: Members can invite friends to join the group and voluntarily leave the group.
+- **Group Settings**: Centralized modal to view members, edit group name/description, and update the group avatar (with real-time UI updates for all members).
+- **Clear Chat History**: Independent from disbanding; allows any user to locally clear their message history in the group without affecting other members.
+
+### Public Channels
+- **Create Channels**: Users can create public or private channels to broadcast messages.
+- **Explore Channels**: Users can search and explore public channels. The system suggests popular channels based on follower count.
+- **Preview & Join**: Users can preview a channel's info (avatar, follower count, description) before joining.
+- **Channel Permissions**: Only admins (leaders) can send messages. Admins can ban members and delete the channel (requires password confirmation). Members can view messages, leave the channel, but cannot send messages.
+
+### Real-Time Video/Audio Call (1:1 and Group)
+- **Call Launchers**: Integrated in `ChatWindowHeader.tsx` (Voice Call & Video Call buttons).
+- **Ringing System**: Emits `call:invite` and triggers a clean visual `<IncomingCallModal />` with pulse animations and Mixkit Ringtone audio on loop for target users.
+- **Web Push/Browser Notification**: Automatically pops up browser alerts when a call starts, directing the user back to the webapp on click.
+- **Messenger-Style Call Room**: Prebuilt grid via LiveKit SDK inside `<CallRoomModal />` with Mute, Video Toggle, and Screen Share controls. 
+- **AI Noise Filter (Krisp)**: Tích hợp Krisp để lọc tiếng ồn hai chiều bằng AI.
+- **Device Settings**: Tùy chỉnh nhanh Microphone, Camera, Speaker trực tiếp trong cuộc gọi.
+- **Floating Panel Control**: Users can minimize the call layout to a small draggable panel in the corner to continue chatting.
+
+---
+
+## 6. Current API Surface
+
+### Base URL
+- Development: http://localhost:5002/api
+
+### Public routes
+- POST /api/auth/signup
+- POST /api/auth/signin
+- POST /api/auth/signout
+- POST /api/auth/refresh
+
+### Protected routes
+- GET /api/users/me
+- PUT /api/users/me
+- GET /api/users/search
+- GET /api/users/:id
+- POST /api/users/uploadAvatar
+- POST /api/friends/requests
+- POST /api/friends/requests/:requestId/accept
+- POST /api/friends/requests/:requestId/decline
+- GET /api/friends
+- GET /api/friends/requests
+- POST /api/users/lock-conversation/:conversationId
+- POST /api/users/verify-lock/:conversationId
+- POST /api/users/reset-lock/:conversationId
+- POST /api/users/:id/block
+- POST /api/users/:id/unblock
+- POST /api/messages/direct
+- POST /api/messages/group
+- POST /api/messages/upload-audio
+- POST /api/messages/upload-image
+- POST /api/messages/upload-file
+- POST /api/messages/:messageId/react
+- POST /api/messages/:messageId/pin
+- POST /api/messages/:messageId/view-media
+- POST /api/messages/:messageId/recall
+- POST /api/messages/:messageId/delete-for-me
+- POST /api/messages/:messageId/vote
+- POST /api/messages/:messageId/translate
+- POST /api/messages/:messageId/edit
+- POST /api/messages/schedule
+- GET /api/messages/scheduled
+- GET /api/messages/scheduled/:conversationId
+- DELETE /api/messages/scheduled/:id
+- PUT /api/messages/scheduled/:id
+- POST /api/conversations
+- POST /api/conversations/channel
+- GET /api/conversations/channels/explore
+- GET /api/conversations/preview/:id
+- POST /api/conversations/:id/join
+- PATCH /api/conversations/:id/visibility
+- GET /api/conversations
+- GET /api/conversations/:conversationId/messages
+- GET /api/conversations/:conversationId/messages/pinned
+- GET /api/conversations/:conversationId/messages/search
+- PATCH /api/conversations/:conversationId/seen
+- POST /api/conversations/:id/wallpaper
+- POST /api/conversations/:id/nickname
+- POST /api/conversations/:id/members
+- DELETE /api/conversations/:id/members/:memberId
+- POST /api/conversations/:id/members/ban
+- PATCH /api/conversations/:id/role
+- PATCH /api/conversations/:id/info
+- POST /api/conversations/:id/incognito
+- POST /api/conversations/:id/avatar
+- DELETE /api/conversations/:id/avatar
+- DELETE /api/conversations/:id
+- POST /api/conversations/:id/clear
+- POST /api/conversations/:id/leave
+- GET /api/conversations/:id/summarize
+- POST /api/calls/token (Requests token and room details for LiveKit call room)
+- GET / POST /api/feedback
+- GET / POST /api/reviews
+- GET / POST /api/stories
+
+---
+
+## 7. Data Models
+
+### User
+- username
+- hashedPassword
+- email
+- displayName
+- avatarUrl
+- avatarId
+- coverUrl
+- bio
+- phone
+- note
+- presenceStatus
+- lockedConversations
+- blockedUsers
+
+### Conversation
+- type: direct | group | channel
+- visibility: public | private
+- participants
+- group.name / group.createdBy
+- lastMessageAt
+- seenBy
+- lastMessage
+- unreadCounts
+- wallpaper
+- nicknames
+- incognitoMode
+
+### Message
+- conversationId
+- senderId
+- content
+- imgUrl
+- audioUrl
+- fileUrl
+- fileName
+- fileSize
+- sharedContact
+- poll
+- isPinned
+- isRecalled
+- isEdited
+- editHistory
+- deletedFor
+- expiresIn
+- expiresAt
+- isViewOnce
+- viewedBy
+- reactions
+- timestamps
+
+### Friend
+- userA
+- userB
+
+### FriendRequest
+- from
+- to
+- message
+
+### Session
+- userId
+- refreshToken
+- expiresAt
+
+### Story
+- User relationships and media content for status updates
+
+### ScheduledMessage
+- Timing data and payload for future messages
+
+### Feedback & Review
+- User ratings, comments, and application feedback
+
+### Otp
+- Email verification codes and expirations
+
+---
+
+## 8. Frontend State Structure
+
+The frontend uses several Zustand stores:
+- useAuthStore: authentication state, sign in/out, session refresh
+- useChatStore: conversations, messages, active conversation, chat actions
+- useFriendStore: friend list and friend request operations
+- useSocketStore: client-side socket connection logic, triggers call listeners dynamically
+- useThemeStore: theme state
+- useUserStore: user-specific actions
+- useCallStore: active call state, incoming call state, starts and finishes call session
+- useProfileStore: mini profile sidebar state and data
+- useMediaViewerStore: global media viewer state for displaying images and videos
+- useStoryStore: state management for viewing and posting stories
+- useOfflineStore: state management for network connectivity and offline banners
+- useScheduleStore: state management for scheduling messages
+- useAccountInfoModalStore: manages the account settings modal visibility
+
+---
+
+## 9. Current Gaps and Known Issues
+
+### Product scope
+- No unfriend action yet.
+
+---
+
+## 10. Summary
+
+NexusChat is a fully functional web-based messaging app with instant chat capability and high-quality Messenger-style real-time audio and video call features, integrated via Socket.IO and LiveKit SFU.
+
+---
+
+## 11. Agent Development Rules (Critical)
+
+### 11.1 Core rules
+- Do not change the meaning of existing API contracts unless the change is explicitly requested.
+- Preserve existing authentication flow.
+- Ensure all socket handshakes decrypt token to set `socket.data.userId` properly. Do not bypass the personal `user:${userId}` room logic.
+- Avoid replacing or refactoring LiveKit room setups. Prefer extension.
+
+### 11.2 Call Flows Signaling Contract
+The signaling events should respect the following rules:
+- `call:invite` -> sends invitation to user rooms.
+- `call:accept` -> signals to caller the call is accepted.
+- `call:decline` -> signals rejection.
+- `call:end` -> cleans up rooms.
+
+### 11.3 Warning list
+- Do not remove fallback JWT decode on socket connection in `server.js`.
+- Do not bypass autoplay restrictions without warning. Ensure first-click user interactions are preserved.
+
