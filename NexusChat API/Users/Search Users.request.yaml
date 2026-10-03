@@ -1,0 +1,6 @@
+$kind: http-request
+url: "{{baseUrl}}/api/users/search?query=test"
+method: GET
+queryParams:
+  query: test
+order: 2000

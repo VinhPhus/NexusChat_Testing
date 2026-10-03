@@ -1,305 +1,365 @@
-	{
-		"info": {
-			"name": "NexusChat API",
-			"description": "API collection for NexusChat project",
-			"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
-		},
-		"item": [
-			{
-				"name": "Auth",
-				"item": [
-					{
-						"name": "Signup",
-						"request": {
-							"method": "POST",
-							"header": [
-								{
-									"key": "Content-Type",
-									"value": "application/json"
-								}
-							],
-							"body": {
-								"mode": "raw",
-								"raw": "{\n  \"username\": \"testuser\",\n  \"email\": \"test@example.com\",\n  \"password\": \"password123\"\n}"
-							},
-							"url": {
-								"raw": "{{baseUrl}}/api/auth/signup",
-								"host": [
-									"{{baseUrl}}"
-								],
-								"path": [
-									"api",
-									"auth",
-									"signup"
-								]
-							}
-						}
-					},
-					{
-						"name": "Signin",
-						"request": {
-							"method": "POST",
-							"header": [
-								{
-									"key": "Content-Type",
-									"value": "application/json"
-								}
-							],
-							"body": {
-								"mode": "raw",
-								"raw": "{\n  \"email\": \"test@example.com\",\n  \"password\": \"password123\"\n}"
-							},
-							"url": {
-								"raw": "{{baseUrl}}/api/auth/signin",
-								"host": [
-									"{{baseUrl}}"
-								],
-								"path": [
-									"api",
-									"auth",
-									"signin"
-								]
-							}
-						}
-					},
-					{
-						"name": "Signout",
-						"request": {
-							"method": "POST",
-							"header": [],
-							"url": {
-								"raw": "{{baseUrl}}/api/auth/signout",
-								"host": [
-									"{{baseUrl}}"
-								],
-								"path": [
-									"api",
-									"auth",
-									"signout"
-								]
-							}
-						}
-					}
-				]
-			},
-			{
-				"name": "Users",
-				"item": [
-					{
-						"name": "Get Current User (Me)",
-						"request": {
-							"method": "GET",
-							"header": [],
-							"url": {
-								"raw": "{{baseUrl}}/api/users/me",
-								"host": [
-									"{{baseUrl}}"
-								],
-								"path": [
-									"api",
-									"users",
-									"me"
-								]
-							}
-						}
-					},
-					{
-						"name": "Search Users",
-						"request": {
-							"method": "GET",
-							"header": [],
-							"url": {
-								"raw": "{{baseUrl}}/api/users/search?query=test",
-								"host": [
-									"{{baseUrl}}"
-								],
-								"path": [
-									"api",
-									"users",
-									"search"
-								],
-								"query": [
-									{
-										"key": "query",
-										"value": "test"
-									}
-								]
-							}
-						}
-					},
-					{
-						"name": "Get User Profile",
-						"request": {
-							"method": "GET",
-							"header": [],
-							"url": {
-								"raw": "{{baseUrl}}/api/users/:id",
-								"host": [
-									"{{baseUrl}}"
-								],
-								"path": [
-									"api",
-									"users",
-									":id"
-								],
-								"variable": [
-									{
-										"key": "id",
-										"value": "USER_ID_HERE"
-									}
-								]
-							}
-						}
-					}
-				]
-			},
-			{
-				"name": "Friends",
-				"item": [
-					{
-						"name": "Get Friends",
-						"request": {
-							"method": "GET",
-							"header": [],
-							"url": {
-								"raw": "{{baseUrl}}/api/friends",
-								"host": [
-									"{{baseUrl}}"
-								],
-								"path": [
-									"api",
-									"friends"
-								]
-							}
-						}
-					},
-					{
-						"name": "Send Friend Request",
-						"request": {
-							"method": "POST",
-							"header": [
-								{
-									"key": "Content-Type",
-									"value": "application/json"
-								}
-							],
-							"body": {
-								"mode": "raw",
-								"raw": "{\n  \"receiverId\": \"USER_ID_HERE\"\n}"
-							},
-							"url": {
-								"raw": "{{baseUrl}}/api/friends/requests",
-								"host": [
-									"{{baseUrl}}"
-								],
-								"path": [
-									"api",
-									"friends",
-									"requests"
-								]
-							}
-						}
-					}
-				]
-			},
-			{
-				"name": "Conversations",
-				"item": [
-					{
-						"name": "Get Conversations",
-						"request": {
-							"method": "GET",
-							"header": [],
-							"url": {
-								"raw": "{{baseUrl}}/api/conversations",
-								"host": [
-									"{{baseUrl}}"
-								],
-								"path": [
-									"api",
-									"conversations"
-								]
-							}
-						}
-					},
-					{
-						"name": "Get Messages in Conversation",
-						"request": {
-							"method": "GET",
-							"header": [],
-							"url": {
-								"raw": "{{baseUrl}}/api/conversations/:conversationId/messages",
-								"host": [
-									"{{baseUrl}}"
-								],
-								"path": [
-									"api",
-									"conversations",
-									":conversationId",
-									"messages"
-								],
-								"variable": [
-									{
-										"key": "conversationId",
-										"value": "CONVERSATION_ID_HERE"
-									}
-								]
-							}
-						}
-					}
-				]
-			},
-			{
-				"name": "Messages",
-				"item": [
-					{
-						"name": "Send Direct Message",
-						"request": {
-							"method": "POST",
-							"header": [
-								{
-									"key": "Content-Type",
-									"value": "application/json"
-								}
-							],
-							"body": {
-								"mode": "raw",
-								"raw": "{\n  \"receiverId\": \"USER_ID_HERE\",\n  \"text\": \"Hello from Postman!\"\n}"
-							},
-							"url": {
-								"raw": "{{baseUrl}}/api/messages/direct",
-								"host": [
-									"{{baseUrl}}"
-								],
-								"path": [
-									"api",
-									"messages",
-									"direct"
-								]
-							}
-						}
-					}
-				]
-			}
-		],
-		"auth": {
-			"type": "bearer",
-			"bearer": [
+{
+	"info": {
+		"name": "NexusChat API",
+		"description": "API collection for NexusChat project",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Auth",
+			"item": [
 				{
-					"key": "token",
-					"value": "{{bearerToken}}",
-					"type": "string"
+					"name": "Signup",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"username\": \"testuser\",\n  \"email\": \"test@example.com\",\n  \"password\": \"password123\",\n  \"firstName\": \"User\",\n  \"lastName\": \"Test\",\n  \"otp\": \"123456\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/signup",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"signup"
+							]
+						}
+					}
+				},
+				{
+					"name": "Signin",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"username\": \"testuser1\",\n  \"password\": \"123456\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/signin",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"signin"
+							]
+						}
+					}
+				},
+				{
+					"name": "Signout",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/signout",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"signout"
+							]
+						}
+					}
 				}
 			]
 		},
-		"variable": [
+		{
+			"name": "Users",
+			"item": [
+				{
+					"name": "Get Current User (Me)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/users/me",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"me"
+							]
+						}
+					}
+				},
+				{
+					"name": "Search Users",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/users/search?username=test",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"search"
+							],
+							"query": [
+								{
+									"key": "username",
+									"value": "test"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Get User Profile",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/users/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"users",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "USER_ID_HERE"
+								}
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Friends",
+			"item": [
+				{
+					"name": "Get Friends",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/friends",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"friends"
+							]
+						}
+					}
+				},
+				{
+					"name": "Send Friend Request",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"to\": \"000000000000000000000000\",\n  \"message\": \"Chào bạn!\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/friends/requests",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"friends",
+								"requests"
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Conversations",
+			"item": [
+				{
+					"name": "Create Conversation",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"type\": \"group\",\n  \"name\": \"Nhóm Test Demo\",\n  \"memberIds\": [\"ID1\", \"ID2\"]\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/conversations",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"conversations"
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Conversations",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/conversations",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"conversations"
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Messages in Conversation",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/conversations/:conversationId/messages",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"conversations",
+								":conversationId",
+								"messages"
+							],
+							"variable": [
+								{
+									"key": "conversationId",
+									"value": "CONVERSATION_ID_HERE"
+								}
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Messages",
+			"item": [
+				{
+					"name": "Send Direct Message",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"recipientId\": \"USER_ID_HERE\",\n  \"content\": \"Hello from Postman!\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/messages/direct",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"messages",
+								"direct"
+							]
+						}
+					}
+				},
+				{
+					"name": "React to Message",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"emoji\": \"👍\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/messages/:messageId/react",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"messages",
+								":messageId",
+								"react"
+							],
+							"variable": [
+								{
+									"key": "messageId",
+									"value": "MESSAGE_ID_HERE"
+								}
+							]
+						}
+					}
+				}
+			]
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
 			{
-				"key": "baseUrl",
-				"value": "http://localhost:5002"
-			},
-			{
-				"key": "bearerToken",
-				"value": ""
+				"key": "token",
+				"value": "{{bearerToken}}",
+				"type": "string"
 			}
 		]
-	}
+	},
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:5002"
+		},
+		{
+			"key": "bearerToken",
+			"value": ""
+		}
+	]
+}
