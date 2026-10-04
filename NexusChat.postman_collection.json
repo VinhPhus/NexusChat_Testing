@@ -1,305 +1,2301 @@
-	{
-		"info": {
-			"name": "NexusChat API",
-			"description": "API collection for NexusChat project",
-			"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
-		},
-		"item": [
-			{
-				"name": "Auth",
-				"item": [
-					{
-						"name": "Signup",
-						"request": {
-							"method": "POST",
-							"header": [
-								{
-									"key": "Content-Type",
-									"value": "application/json"
-								}
-							],
-							"body": {
-								"mode": "raw",
-								"raw": "{\n  \"username\": \"testuser\",\n  \"email\": \"test@example.com\",\n  \"password\": \"password123\"\n}"
-							},
-							"url": {
-								"raw": "{{baseUrl}}/api/auth/signup",
-								"host": [
-									"{{baseUrl}}"
-								],
-								"path": [
-									"api",
-									"auth",
-									"signup"
-								]
-							}
-						}
-					},
-					{
-						"name": "Signin",
-						"request": {
-							"method": "POST",
-							"header": [
-								{
-									"key": "Content-Type",
-									"value": "application/json"
-								}
-							],
-							"body": {
-								"mode": "raw",
-								"raw": "{\n  \"email\": \"test@example.com\",\n  \"password\": \"password123\"\n}"
-							},
-							"url": {
-								"raw": "{{baseUrl}}/api/auth/signin",
-								"host": [
-									"{{baseUrl}}"
-								],
-								"path": [
-									"api",
-									"auth",
-									"signin"
-								]
-							}
-						}
-					},
-					{
-						"name": "Signout",
-						"request": {
-							"method": "POST",
-							"header": [],
-							"url": {
-								"raw": "{{baseUrl}}/api/auth/signout",
-								"host": [
-									"{{baseUrl}}"
-								],
-								"path": [
-									"api",
-									"auth",
-									"signout"
-								]
-							}
-						}
-					}
-				]
-			},
-			{
-				"name": "Users",
-				"item": [
-					{
-						"name": "Get Current User (Me)",
-						"request": {
-							"method": "GET",
-							"header": [],
-							"url": {
-								"raw": "{{baseUrl}}/api/users/me",
-								"host": [
-									"{{baseUrl}}"
-								],
-								"path": [
-									"api",
-									"users",
-									"me"
-								]
-							}
-						}
-					},
-					{
-						"name": "Search Users",
-						"request": {
-							"method": "GET",
-							"header": [],
-							"url": {
-								"raw": "{{baseUrl}}/api/users/search?query=test",
-								"host": [
-									"{{baseUrl}}"
-								],
-								"path": [
-									"api",
-									"users",
-									"search"
-								],
-								"query": [
-									{
-										"key": "query",
-										"value": "test"
-									}
-								]
-							}
-						}
-					},
-					{
-						"name": "Get User Profile",
-						"request": {
-							"method": "GET",
-							"header": [],
-							"url": {
-								"raw": "{{baseUrl}}/api/users/:id",
-								"host": [
-									"{{baseUrl}}"
-								],
-								"path": [
-									"api",
-									"users",
-									":id"
-								],
-								"variable": [
-									{
-										"key": "id",
-										"value": "USER_ID_HERE"
-									}
-								]
-							}
-						}
-					}
-				]
-			},
-			{
-				"name": "Friends",
-				"item": [
-					{
-						"name": "Get Friends",
-						"request": {
-							"method": "GET",
-							"header": [],
-							"url": {
-								"raw": "{{baseUrl}}/api/friends",
-								"host": [
-									"{{baseUrl}}"
-								],
-								"path": [
-									"api",
-									"friends"
-								]
-							}
-						}
-					},
-					{
-						"name": "Send Friend Request",
-						"request": {
-							"method": "POST",
-							"header": [
-								{
-									"key": "Content-Type",
-									"value": "application/json"
-								}
-							],
-							"body": {
-								"mode": "raw",
-								"raw": "{\n  \"receiverId\": \"USER_ID_HERE\"\n}"
-							},
-							"url": {
-								"raw": "{{baseUrl}}/api/friends/requests",
-								"host": [
-									"{{baseUrl}}"
-								],
-								"path": [
-									"api",
-									"friends",
-									"requests"
-								]
-							}
-						}
-					}
-				]
-			},
-			{
-				"name": "Conversations",
-				"item": [
-					{
-						"name": "Get Conversations",
-						"request": {
-							"method": "GET",
-							"header": [],
-							"url": {
-								"raw": "{{baseUrl}}/api/conversations",
-								"host": [
-									"{{baseUrl}}"
-								],
-								"path": [
-									"api",
-									"conversations"
-								]
-							}
-						}
-					},
-					{
-						"name": "Get Messages in Conversation",
-						"request": {
-							"method": "GET",
-							"header": [],
-							"url": {
-								"raw": "{{baseUrl}}/api/conversations/:conversationId/messages",
-								"host": [
-									"{{baseUrl}}"
-								],
-								"path": [
-									"api",
-									"conversations",
-									":conversationId",
-									"messages"
-								],
-								"variable": [
-									{
-										"key": "conversationId",
-										"value": "CONVERSATION_ID_HERE"
-									}
-								]
-							}
-						}
-					}
-				]
-			},
-			{
-				"name": "Messages",
-				"item": [
-					{
-						"name": "Send Direct Message",
-						"request": {
-							"method": "POST",
-							"header": [
-								{
-									"key": "Content-Type",
-									"value": "application/json"
-								}
-							],
-							"body": {
-								"mode": "raw",
-								"raw": "{\n  \"receiverId\": \"USER_ID_HERE\",\n  \"text\": \"Hello from Postman!\"\n}"
-							},
-							"url": {
-								"raw": "{{baseUrl}}/api/messages/direct",
-								"host": [
-									"{{baseUrl}}"
-								],
-								"path": [
-									"api",
-									"messages",
-									"direct"
-								]
-							}
-						}
-					}
-				]
-			}
-		],
-		"auth": {
-			"type": "bearer",
-			"bearer": [
+{
+	"info": {
+		"name": "NexusChat API - Full",
+		"description": "Complete API collection for NexusChat project",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Auth",
+			"item": [
 				{
-					"key": "token",
-					"value": "{{bearerToken}}",
-					"type": "string"
+					"name": "Check Username",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/check-username",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"check-username"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"username\": \"testuser1\"\n}"
+						}
+					}
+				},
+				{
+					"name": "Check Email",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/check-email",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"check-email"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"test@example.com\"\n}"
+						}
+					}
+				},
+				{
+					"name": "Send OTP",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/send-otp",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"send-otp"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"test@example.com\",\n  \"type\": \"register\"\n}"
+						}
+					}
+				},
+				{
+					"name": "Verify OTP",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/verify-otp",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"verify-otp"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"test@example.com\",\n  \"otp\": \"123456\",\n  \"type\": \"register\"\n}"
+						}
+					}
+				},
+				{
+					"name": "Signup",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/signup",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"signup"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"username\": \"testuser1\",\n  \"password\": \"password123\",\n  \"email\": \"test@example.com\",\n  \"firstName\": \"First\",\n  \"lastName\": \"Last\",\n  \"otp\": \"123456\"\n}"
+						}
+					}
+				},
+				{
+					"name": "Reset Password",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/reset-password",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"reset-password"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"test@example.com\",\n  \"otp\": \"123456\",\n  \"newPassword\": \"newpassword123\"\n}"
+						}
+					}
+				},
+				{
+					"name": "Signin",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/signin",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"signin"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"username\": \"testuser1\",\n  \"password\": \"password123\"\n}"
+						}
+					}
+				},
+				{
+					"name": "Signout",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/signout",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"signout"
+							]
+						}
+					}
+				},
+				{
+					"name": "Refresh Token",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/refresh",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"refresh"
+							]
+						}
+					}
 				}
 			]
 		},
-		"variable": [
+		{
+			"name": "Users",
+			"item": [
+				{
+					"name": "Search Users",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/users/search?query=test",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"search"
+							],
+							"query": [
+								{
+									"key": "query",
+									"value": "test"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Get User Count",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/users/count",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"count"
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Current User (Me)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/users/me",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"me"
+							]
+						}
+					}
+				},
+				{
+					"name": "Update Me",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/users/me",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"me"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"displayName\": \"New Name\",\n  \"bio\": \"Hello\"\n}"
+						}
+					}
+				},
+				{
+					"name": "Delete Account (OTP)",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/users/me",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"me"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"otp\": \"123456\"\n}"
+						}
+					}
+				},
+				{
+					"name": "Change Password (OTP)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/users/change-password",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"change-password"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"otp\": \"123456\",\n  \"newPassword\": \"newpassword123\"\n}"
+						}
+					}
+				},
+				{
+					"name": "Get Blocked Users",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/users/me/blocked",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"me",
+								"blocked"
+							]
+						}
+					}
+				},
+				{
+					"name": "Toggle Read Receipts",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/users/read-receipts",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"read-receipts"
+							]
+						}
+					}
+				},
+				{
+					"name": "Upload Avatar",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/users/uploadAvatar",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"uploadAvatar"
+							]
+						},
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"type": "file",
+									"src": []
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Remove Avatar",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/users/avatar",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"avatar"
+							]
+						}
+					}
+				},
+				{
+					"name": "Upload Cover",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/users/uploadCover",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"uploadCover"
+							]
+						},
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"type": "file",
+									"src": []
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Update Note",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/users/note",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"note"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"note\": \"New note\"\n}"
+						}
+					}
+				},
+				{
+					"name": "Add Profile Photo",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/users/photos",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"photos"
+							]
+						},
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"type": "file",
+									"src": []
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Delete Profile Photo",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/users/photos/:photoId",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"photos",
+								":photoId"
+							],
+							"variable": [
+								{
+									"key": "photoId",
+									"value": "ID_HERE"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "React Profile Photo",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/users/:userId/photos/:photoId/react",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"users",
+								":userId",
+								"photos",
+								":photoId",
+								"react"
+							],
+							"variable": [
+								{
+									"key": "userId",
+									"value": "ID_HERE"
+								},
+								{
+									"key": "photoId",
+									"value": "ID_HERE"
+								}
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"emoji\": \"❤️\"\n}"
+						}
+					}
+				},
+				{
+					"name": "Lock Conversation",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/users/lock-conversation/:conversationId",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"lock-conversation",
+								":conversationId"
+							],
+							"variable": [
+								{
+									"key": "conversationId",
+									"value": "ID_HERE"
+								}
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"passcode\": \"123456\"\n}"
+						}
+					}
+				},
+				{
+					"name": "Verify Lock",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/users/verify-lock/:conversationId",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"verify-lock",
+								":conversationId"
+							],
+							"variable": [
+								{
+									"key": "conversationId",
+									"value": "ID_HERE"
+								}
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"passcode\": \"123456\"\n}"
+						}
+					}
+				},
+				{
+					"name": "Reset Lock",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/users/reset-lock/:conversationId",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"reset-lock",
+								":conversationId"
+							],
+							"variable": [
+								{
+									"key": "conversationId",
+									"value": "ID_HERE"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Block User",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/users/:id/block",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"users",
+								":id",
+								"block"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "ID_HERE"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Unblock User",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/users/:id/unblock",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"users",
+								":id",
+								"unblock"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "ID_HERE"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Get User Profile",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/users/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"users",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "ID_HERE"
+								}
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Friends",
+			"item": [
+				{
+					"name": "Send Friend Request",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/friends/requests",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"friends",
+								"requests"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"to\": \"ID_HERE\",\n  \"message\": \"Hi\"\n}"
+						}
+					}
+				},
+				{
+					"name": "Accept Friend Request",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/friends/requests/:requestId/accept",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"friends",
+								"requests",
+								":requestId",
+								"accept"
+							],
+							"variable": [
+								{
+									"key": "requestId",
+									"value": "ID_HERE"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Decline Friend Request",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/friends/requests/:requestId/decline",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"friends",
+								"requests",
+								":requestId",
+								"decline"
+							],
+							"variable": [
+								{
+									"key": "requestId",
+									"value": "ID_HERE"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Get All Friends",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/friends",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"friends"
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Friend Requests",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/friends/requests",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"friends",
+								"requests"
+							]
+						}
+					}
+				},
+				{
+					"name": "Remove Friend",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/friends/:friendId",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"friends",
+								":friendId"
+							],
+							"variable": [
+								{
+									"key": "friendId",
+									"value": "ID_HERE"
+								}
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Conversations",
+			"item": [
+				{
+					"name": "Create Conversation",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/conversations",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"conversations"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"type\": \"group\",\n  \"name\": \"New Group\",\n  \"memberIds\": [\n    \"ID_1\"\n  ]\n}"
+						}
+					}
+				},
+				{
+					"name": "Create Channel",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/conversations/channel",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"conversations",
+								"channel"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"New Channel\"\n}"
+						}
+					}
+				},
+				{
+					"name": "Explore Public Channels",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/conversations/channels/explore",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"conversations",
+								"channels",
+								"explore"
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Channel Preview",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/conversations/preview/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"conversations",
+								"preview",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "ID_HERE"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Join Channel",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/conversations/:id/join",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"conversations",
+								":id",
+								"join"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "ID_HERE"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Update Channel Visibility",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/conversations/:id/visibility",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"conversations",
+								":id",
+								"visibility"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "ID_HERE"
+								}
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"isPublic\": true\n}"
+						}
+					}
+				},
+				{
+					"name": "Get Conversations",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/conversations",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"conversations"
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Messages",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/conversations/:conversationId/messages?limit=50",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"conversations",
+								":conversationId",
+								"messages"
+							],
+							"query": [
+								{
+									"key": "limit",
+									"value": "50"
+								}
+							],
+							"variable": [
+								{
+									"key": "conversationId",
+									"value": "ID_HERE"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Pinned Messages",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/conversations/:conversationId/messages/pinned",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"conversations",
+								":conversationId",
+								"messages",
+								"pinned"
+							],
+							"variable": [
+								{
+									"key": "conversationId",
+									"value": "ID_HERE"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Search Messages",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/conversations/:conversationId/messages/search?q=hello",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"conversations",
+								":conversationId",
+								"messages",
+								"search"
+							],
+							"query": [
+								{
+									"key": "q",
+									"value": "hello"
+								}
+							],
+							"variable": [
+								{
+									"key": "conversationId",
+									"value": "ID_HERE"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Mark Conversation As Seen",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/conversations/:conversationId/seen",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"conversations",
+								":conversationId",
+								"seen"
+							],
+							"variable": [
+								{
+									"key": "conversationId",
+									"value": "ID_HERE"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Update Wallpaper",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/conversations/:id/wallpaper",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"conversations",
+								":id",
+								"wallpaper"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "ID_HERE"
+								}
+							]
+						},
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "image",
+									"type": "file",
+									"src": []
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Update Nickname",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/conversations/:id/nickname",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"conversations",
+								":id",
+								"nickname"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "ID_HERE"
+								}
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"targetUserId\": \"ID_HERE\",\n  \"nickname\": \"Bro\"\n}"
+						}
+					}
+				},
+				{
+					"name": "Add Group Members",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/conversations/:id/members",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"conversations",
+								":id",
+								"members"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "ID_HERE"
+								}
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"memberIds\": [\n    \"ID_HERE\"\n  ]\n}"
+						}
+					}
+				},
+				{
+					"name": "Remove Group Member",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/conversations/:id/members/:memberId",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"conversations",
+								":id",
+								"members",
+								":memberId"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "ID_HERE"
+								},
+								{
+									"key": "memberId",
+									"value": "ID_HERE"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Ban Group Member",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/conversations/:id/members/ban",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"conversations",
+								":id",
+								"members",
+								"ban"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "ID_HERE"
+								}
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"memberId\": \"ID_HERE\"\n}"
+						}
+					}
+				},
+				{
+					"name": "Update Group Role",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/conversations/:id/role",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"conversations",
+								":id",
+								"role"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "ID_HERE"
+								}
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"memberId\": \"ID_HERE\",\n  \"role\": \"deputy\"\n}"
+						}
+					}
+				},
+				{
+					"name": "Update Group Info",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/conversations/:id/info",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"conversations",
+								":id",
+								"info"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "ID_HERE"
+								}
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"New Name\",\n  \"description\": \"Desc\"\n}"
+						}
+					}
+				},
+				{
+					"name": "Update Group Avatar",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/conversations/:id/avatar",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"conversations",
+								":id",
+								"avatar"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "ID_HERE"
+								}
+							]
+						},
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "avatar",
+									"type": "file",
+									"src": []
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Remove Group Avatar",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/conversations/:id/avatar",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"conversations",
+								":id",
+								"avatar"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "ID_HERE"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Delete Conversation",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/conversations/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"conversations",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "ID_HERE"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Clear Chat History",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/conversations/:id/clear",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"conversations",
+								":id",
+								"clear"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "ID_HERE"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Leave Group",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/conversations/:id/leave",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"conversations",
+								":id",
+								"leave"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "ID_HERE"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Create Voice Room",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/conversations/:id/voice-rooms",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"conversations",
+								":id",
+								"voice-rooms"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "ID_HERE"
+								}
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Room 1\"\n}"
+						}
+					}
+				},
+				{
+					"name": "Update Voice Room",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/conversations/:id/voice-rooms/:roomId",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"conversations",
+								":id",
+								"voice-rooms",
+								":roomId"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "ID_HERE"
+								},
+								{
+									"key": "roomId",
+									"value": "ID_HERE"
+								}
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Room 1 updated\"\n}"
+						}
+					}
+				},
+				{
+					"name": "Delete Voice Room",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/conversations/:id/voice-rooms/:roomId",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"conversations",
+								":id",
+								"voice-rooms",
+								":roomId"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "ID_HERE"
+								},
+								{
+									"key": "roomId",
+									"value": "ID_HERE"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Toggle Incognito Mode",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/conversations/:id/incognito",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"conversations",
+								":id",
+								"incognito"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "ID_HERE"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Summarize Conversation",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/conversations/:id/summarize",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"conversations",
+								":id",
+								"summarize"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "ID_HERE"
+								}
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Messages",
+			"item": [
+				{
+					"name": "Schedule Message",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/messages/schedule",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"messages",
+								"schedule"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"recipientId\": \"ID_HERE\",\n  \"content\": \"Hi\",\n  \"scheduledAt\": \"2026-10-10T10:00:00Z\"\n}"
+						}
+					}
+				},
+				{
+					"name": "Get Scheduled Messages",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/messages/scheduled",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"messages",
+								"scheduled"
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Scheduled Messages by Convo",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/messages/scheduled/:conversationId",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"messages",
+								"scheduled",
+								":conversationId"
+							],
+							"variable": [
+								{
+									"key": "conversationId",
+									"value": "ID_HERE"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Cancel Scheduled Message",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/messages/scheduled/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"messages",
+								"scheduled",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "ID_HERE"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Update Scheduled Message",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/messages/scheduled/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"messages",
+								"scheduled",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "ID_HERE"
+								}
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"content\": \"Updated\"\n}"
+						}
+					}
+				},
+				{
+					"name": "Send Direct Message",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/messages/direct",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"messages",
+								"direct"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"recipientId\": \"ID_HERE\",\n  \"content\": \"Hello\"\n}"
+						}
+					}
+				},
+				{
+					"name": "Send Group Message",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/messages/group",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"messages",
+								"group"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"conversationId\": \"ID_HERE\",\n  \"content\": \"Hello Group\"\n}"
+						}
+					}
+				},
+				{
+					"name": "Upload Audio",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/messages/upload-audio",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"messages",
+								"upload-audio"
+							]
+						},
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"type": "file",
+									"src": []
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Upload Image",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/messages/upload-image",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"messages",
+								"upload-image"
+							]
+						},
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"type": "file",
+									"src": []
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Upload File",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/messages/upload-file",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"messages",
+								"upload-file"
+							]
+						},
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"type": "file",
+									"src": []
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "React To Message",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/messages/:messageId/react",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"messages",
+								":messageId",
+								"react"
+							],
+							"variable": [
+								{
+									"key": "messageId",
+									"value": "ID_HERE"
+								}
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"emoji\": \"👍\"\n}"
+						}
+					}
+				},
+				{
+					"name": "Pin Message",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/messages/:messageId/pin",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"messages",
+								":messageId",
+								"pin"
+							],
+							"variable": [
+								{
+									"key": "messageId",
+									"value": "ID_HERE"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Mark Media As Viewed",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/messages/:messageId/view-media",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"messages",
+								":messageId",
+								"view-media"
+							],
+							"variable": [
+								{
+									"key": "messageId",
+									"value": "ID_HERE"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Recall Message",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/messages/:messageId/recall",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"messages",
+								":messageId",
+								"recall"
+							],
+							"variable": [
+								{
+									"key": "messageId",
+									"value": "ID_HERE"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Delete Message For Me",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/messages/:messageId/delete-for-me",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"messages",
+								":messageId",
+								"delete-for-me"
+							],
+							"variable": [
+								{
+									"key": "messageId",
+									"value": "ID_HERE"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Vote On Poll",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/messages/:messageId/vote",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"messages",
+								":messageId",
+								"vote"
+							],
+							"variable": [
+								{
+									"key": "messageId",
+									"value": "ID_HERE"
+								}
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"optionIndex\": 0\n}"
+						}
+					}
+				},
+				{
+					"name": "Translate Message",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/messages/:messageId/translate",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"messages",
+								":messageId",
+								"translate"
+							],
+							"variable": [
+								{
+									"key": "messageId",
+									"value": "ID_HERE"
+								}
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"targetLang\": \"vi\"\n}"
+						}
+					}
+				},
+				{
+					"name": "Edit Message",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/messages/:messageId/edit",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"messages",
+								":messageId",
+								"edit"
+							],
+							"variable": [
+								{
+									"key": "messageId",
+									"value": "ID_HERE"
+								}
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"content\": \"Edited content\"\n}"
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Calls",
+			"item": [
+				{
+					"name": "Get Call Token",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/calls/token",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"calls",
+								"token"
+							]
+						},
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"conversationId\": \"ID_HERE\"\n}"
+						}
+					}
+				}
+			]
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
 			{
-				"key": "baseUrl",
-				"value": "http://localhost:5002"
-			},
-			{
-				"key": "bearerToken",
-				"value": ""
+				"key": "token",
+				"value": "{{bearerToken}}",
+				"type": "string"
 			}
 		]
-	}
+	},
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:5002"
+		},
+		{
+			"key": "bearerToken",
+			"value": ""
+		}
+	]
+}
