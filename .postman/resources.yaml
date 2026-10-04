@@ -1,0 +1,13 @@
+# Use this workspace to collaborate
+workspace:
+  id: fe4041bf-245f-4733-80a0-7fce95c5997f
+
+localResources:
+  collections:
+    - ../NexusChat API
+
+# Each entry here maps a local resource to one or more corresponding objects in Postman Cloud
+
+cloudResources:
+  collections:
+    ../postman/collections/NexusChat API: 5afc106c-ac02-46cf-80d2-79ceb342efd7

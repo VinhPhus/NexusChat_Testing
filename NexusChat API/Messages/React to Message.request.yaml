@@ -1,0 +1,14 @@
+$kind: http-request
+url: "{{baseUrl}}/api/messages/:messageId/react"
+method: POST
+headers:
+  Content-Type: application/json
+pathVariables:
+  messageId: MESSAGE_ID_HERE
+body:
+  type: json
+  content: |-
+    {
+      "emoji": "👍"
+    }
+order: 2000

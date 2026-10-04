@@ -1,0 +1,15 @@
+$kind: collection
+description: API collection for NexusChat project
+variables:
+  - key: baseUrl
+    value: http://localhost:5002
+    disabled: false
+  - key: bearerToken
+    secret: true
+    disabled: false
+auth:
+  - id: dd25d17f-01e3-432b-9225-94a98859aceb
+    type: bearer
+    name: bearer auth
+    credentials:
+      token: "{{bearerToken}}"

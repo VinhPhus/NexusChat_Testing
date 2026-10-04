@@ -1,0 +1,14 @@
+$kind: http-request
+url: "{{baseUrl}}/api/conversations"
+method: POST
+body:
+  type: json
+  content: |-
+    {
+      "type": "group",
+      "name": "Nhóm Test Demo",
+      "memberIds": [
+        "6ac0ca7277f8ca81f5bb8d35"
+      ]
+    }
+order: 2109189937693734

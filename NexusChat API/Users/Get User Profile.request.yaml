@@ -1,0 +1,6 @@
+$kind: http-request
+url: "{{baseUrl}}/api/users/:id"
+method: GET
+pathVariables:
+  id: USER_ID_HERE
+order: 3000
