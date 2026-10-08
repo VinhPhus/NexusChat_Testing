@@ -1,14 +1,12 @@
-FROM node:18-alpine
+FROM node:20
 
 WORKDIR /app
 
-# Cài đặt các công cụ biên dịch mã nguồn C++ (bắt buộc cho thư viện bcrypt)
-RUN apk add --no-cache python3 make g++
+# Chỉ copy package.json (cố tình bỏ qua package-lock.json để tránh xung đột hệ điều hành Windows vs Linux)
+COPY package.json ./
 
-COPY package*.json ./
-
-# Cài đặt thư viện
-RUN npm install
+# Cài đặt thư viện với node:20 (bản đầy đủ, không dùng alpine để tránh 100% lỗi C++)
+RUN npm install --legacy-peer-deps
 
 COPY . .
 
