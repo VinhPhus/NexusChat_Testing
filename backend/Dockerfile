@@ -1,18 +1,17 @@
-FROM node:18
+FROM node:18-alpine
 
 WORKDIR /app
 
-# Copy các file config của npm trước để tận dụng cache của Docker
+# Cài đặt các công cụ biên dịch mã nguồn C++ (bắt buộc cho thư viện bcrypt)
+RUN apk add --no-cache python3 make g++
+
 COPY package*.json ./
 
-# Cài đặt thư viện (production mode)
+# Cài đặt thư viện
 RUN npm install
 
-# Copy toàn bộ mã nguồn vào
 COPY . .
 
-# Port mà backend đang chạy
 EXPOSE 5000
 
-# Lệnh khởi động server
 CMD ["npm", "start"]
