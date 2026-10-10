@@ -30,6 +30,8 @@ Scenario('Kiểm tra ô tìm kiếm bạn bè và nhóm trò chuyện trong Side
     I.fillField('input[placeholder="Tìm kiếm bạn bè, nhóm..."]', 'bạn thân');
     I.wait(1);
 
-    // 3. Kiểm tra ô tìm kiếm hiển thị đúng từ khóa đã nhập
+
     I.seeInField('input[placeholder="Tìm kiếm bạn bè, nhóm..."]', 'bạn thân');
 });
+
+
