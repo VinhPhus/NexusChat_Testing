@@ -9,13 +9,53 @@ import { sendOtpEmail } from "../libs/nodemailer.js";
 
 const ACCESS_TOKEN_TTL = "30m";
 const REFRESH_TOKEN_TTL = 14 * 24 * 60 * 60 * 1000; // 14 ngày
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const USERNAME_REGEX = /^[a-zA-Z0-9._-]+$/;
+
+const validateUsername = (username) => {
+  if (!username || !username.trim()) {
+    return "Tên đăng nhập không được để trống";
+  }
+
+  const trimmed = username.trim();
+
+  if (trimmed.length < 3) {
+    return "Tên đăng nhập phải có ít nhất 3 ký tự";
+  }
+
+  if (trimmed.length > 20) {
+    return "Tên đăng nhập tối đa 20 ký tự";
+  }
+
+  if (!USERNAME_REGEX.test(trimmed)) {
+    return "Tên đăng nhập chỉ được chứa chữ, số, dấu chấm, gạch dưới hoặc gạch ngang";
+  }
+
+  return "";
+};
+
+const validateEmail = (email) => {
+  if (!email || !email.trim()) {
+    return "Email không được để trống";
+  }
+
+  const trimmed = email.trim();
+
+  if (!EMAIL_REGEX.test(trimmed)) {
+    return "Email không hợp lệ. Ví dụ: user@example.com";
+  }
+
+  return "";
+};
 
 // Kiểm tra Tên đăng nhập trùng lặp
 export const checkUsername = async (req, res) => {
   try {
     const { username } = req.body;
-    if (!username || username.trim().length < 3) {
-      return res.status(400).json({ available: false, message: "Tên đăng nhập phải có ít nhất 3 ký tự" });
+    const validationMessage = validateUsername(username);
+
+    if (validationMessage) {
+      return res.status(400).json({ available: false, message: validationMessage });
     }
 
     const user = await User.findOne({ username: username.trim() });
@@ -34,8 +74,10 @@ export const checkUsername = async (req, res) => {
 export const checkEmail = async (req, res) => {
   try {
     const { email } = req.body;
-    if (!email || !email.includes("@")) {
-      return res.status(400).json({ available: false, message: "Email không hợp lệ" });
+    const validationMessage = validateEmail(email);
+
+    if (validationMessage) {
+      return res.status(400).json({ available: false, message: validationMessage });
     }
 
     const user = await User.findOne({ email: email.trim().toLowerCase() });
@@ -60,6 +102,11 @@ export const sendOtp = async (req, res) => {
       !["register", "reset_password", "change_password", "delete_account"].includes(type)
     ) {
       return res.status(400).json({ message: "Email và loại OTP (type) không hợp lệ" });
+    }
+
+    const emailValidationMessage = validateEmail(email);
+    if (emailValidationMessage) {
+      return res.status(400).json({ message: emailValidationMessage });
     }
 
     const emailTrimmed = email.trim().toLowerCase();
@@ -142,6 +189,17 @@ export const signUp = async (req, res) => {
       });
     }
 
+    const usernameTrimmed = username.trim();
+    const usernameValidationMessage = validateUsername(usernameTrimmed);
+    if (usernameValidationMessage) {
+      return res.status(400).json({ message: usernameValidationMessage });
+    }
+
+    const emailValidationMessage = validateEmail(email);
+    if (emailValidationMessage) {
+      return res.status(400).json({ message: emailValidationMessage });
+    }
+
     const emailTrimmed = email.trim().toLowerCase();
 
     // Kiểm tra mã OTP
@@ -151,7 +209,7 @@ export const signUp = async (req, res) => {
     }
 
     // Kiểm tra username tồn tại chưa
-    const duplicateUsername = await User.findOne({ username });
+    const duplicateUsername = await User.findOne({ username: usernameTrimmed });
     if (duplicateUsername) {
       return res.status(409).json({ message: "Username đã tồn tại" });
     }
@@ -167,7 +225,7 @@ export const signUp = async (req, res) => {
 
     // Tạo user mới
     await User.create({
-      username,
+      username: usernameTrimmed,
       hashedPassword,
       email: emailTrimmed,
       displayName: `${lastName} ${firstName}`,
