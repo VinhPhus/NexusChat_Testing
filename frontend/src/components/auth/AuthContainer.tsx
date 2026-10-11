@@ -19,7 +19,6 @@ import {
   EyeOff,
   Loader2,
   LogIn,
-  UserPlus,
   ArrowRight,
   ArrowLeft,
   KeyRound,
@@ -31,14 +30,12 @@ import {
 } from "lucide-react";
 import { authService } from "@/services/authService";
 
-// Sign In Validation Schema
 const signInSchema = z.object({
   username: z.string().min(3, "Tên đăng nhập phải có ít nhất 3 ký tự"),
   password: z.string().min(6, "Mật khẩu phải có ít nhất 6 ký tự"),
 });
 type SignInFormValues = z.infer<typeof signInSchema>;
 
-// Sign Up Validation Schema
 const signUpSchema = z
   .object({
     firstname: z.string().min(1, "Tên bắt buộc phải có"),
@@ -63,22 +60,19 @@ export function AuthContainer({ className, ...props }: React.ComponentProps<"div
   const location = useLocation();
   const navigate = useNavigate();
   const { signIn, signUp, sendOtp, resetPassword } = useAuthStore();
-  
+
   const [showPassword, setShowPassword] = useState(false);
   const [showSignUpConfirmPassword, setShowSignUpConfirmPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
 
-  // Managed internal state for smooth continuous sliding transition
   const [isSignUp, setIsSignUp] = useState(() => location.pathname === "/signup");
 
-  // Sign Up OTP State
   const [signUpStep, setSignUpStep] = useState<1 | 2>(1);
   const [signUpEmail, setSignUpEmail] = useState("");
   const [otpCode, setOtpCode] = useState("");
   const [resendTimer, setResendTimer] = useState(0);
   const [isSendingOtp, setIsSendingOtp] = useState(false);
 
-  // Forgot Password State
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [forgotStep, setForgotStep] = useState<1 | 2>(1);
   const [forgotEmail, setForgotEmail] = useState("");
@@ -87,7 +81,7 @@ export function AuthContainer({ className, ...props }: React.ComponentProps<"div
   const [confirmPasswordVal, setConfirmPasswordVal] = useState("");
   const [forgotResendTimer, setForgotResendTimer] = useState(0);
   const [isForgotLoading, setIsForgotLoading] = useState(false);
-  // Username & Email Check States
+
   const [usernameCheck, setUsernameCheck] = useState<{
     checking: boolean;
     available: boolean | null;
@@ -100,7 +94,6 @@ export function AuthContainer({ className, ...props }: React.ComponentProps<"div
     message: string;
   }>({ checking: false, available: null, message: "" });
 
-  // Sync state if URL changes directly or on back/forward
   useEffect(() => {
     setIsSignUp(location.pathname === "/signup");
     setSignUpStep(1);
@@ -108,7 +101,6 @@ export function AuthContainer({ className, ...props }: React.ComponentProps<"div
     setOtpCode("");
   }, [location.pathname]);
 
-  // Resend Timer for Sign Up OTP
   useEffect(() => {
     if (resendTimer <= 0) return;
     const interval = setInterval(() => {
@@ -117,7 +109,6 @@ export function AuthContainer({ className, ...props }: React.ComponentProps<"div
     return () => clearInterval(interval);
   }, [resendTimer]);
 
-  // Resend Timer for Forgot Password OTP
   useEffect(() => {
     if (forgotResendTimer <= 0) return;
     const interval = setInterval(() => {
@@ -126,7 +117,6 @@ export function AuthContainer({ className, ...props }: React.ComponentProps<"div
     return () => clearInterval(interval);
   }, [forgotResendTimer]);
 
-  // Smooth toggle mode handler
   const handleToggleMode = (targetPath: "/signin" | "/signup") => {
     setIsSignUp(targetPath === "/signup");
     setSignUpStep(1);
@@ -135,7 +125,6 @@ export function AuthContainer({ className, ...props }: React.ComponentProps<"div
     window.history.pushState({}, "", targetPath);
   };
 
-  // Form Hooks
   const {
     register: registerSignIn,
     handleSubmit: handleSubmitSignIn,
@@ -173,7 +162,11 @@ export function AuthContainer({ className, ...props }: React.ComponentProps<"div
       const res = await authService.checkUsername(val);
       setUsernameCheck({ checking: false, available: res.available, message: res.message });
     } catch (error: any) {
-      setUsernameCheck({ checking: false, available: false, message: error.response?.data?.message || "Tên đăng nhập không hợp lệ" });
+      setUsernameCheck({
+        checking: false,
+        available: false,
+        message: error.response?.data?.message || "Tên đăng nhập không hợp lệ",
+      });
     }
   };
 
@@ -188,11 +181,14 @@ export function AuthContainer({ className, ...props }: React.ComponentProps<"div
       const res = await authService.checkEmail(val);
       setEmailCheck({ checking: false, available: res.available, message: res.message });
     } catch (error: any) {
-      setEmailCheck({ checking: false, available: false, message: error.response?.data?.message || "Email không hợp lệ" });
+      setEmailCheck({
+        checking: false,
+        available: false,
+        message: error.response?.data?.message || "Email không hợp lệ",
+      });
     }
   };
 
-  // Handlers
   const onSignInSubmit = async (data: SignInFormValues) => {
     if (!data.username?.trim() || !data.password) {
       toast.error("Bạn cần nhập đủ thông tin!");
@@ -201,8 +197,8 @@ export function AuthContainer({ className, ...props }: React.ComponentProps<"div
     try {
       await signIn(data.username, data.password);
       navigate("/chat");
-    } catch (error) {
-      // Toast thông báo lỗi đã được kích hoạt trong store
+    } catch {
+      // Thông báo lỗi được xử lý trong useAuthStore
     }
   };
 
@@ -210,7 +206,6 @@ export function AuthContainer({ className, ...props }: React.ComponentProps<"div
     toast.error("Bạn cần nhập đủ thông tin!");
   };
 
-  // Handle requesting OTP for Sign Up
   const handleRequestSignUpOtp = async () => {
     const values = getValuesSignUp();
     if (
@@ -247,14 +242,13 @@ export function AuthContainer({ className, ...props }: React.ComponentProps<"div
       await sendOtp(emailToUse, "register");
       setSignUpStep(2);
       setResendTimer(60);
-    } catch (error) {
-      // toast shown in store
+    } catch {
+      // Thông báo lỗi được xử lý trong useAuthStore
     } finally {
       setIsSendingOtp(false);
     }
   };
 
-  // Resend OTP for Sign Up
   const handleResendSignUpOtp = async () => {
     if (resendTimer > 0 || isSendingOtp) return;
     const emailToUse = signUpEmail || getValuesSignUp("email")?.trim().toLowerCase();
@@ -266,14 +260,13 @@ export function AuthContainer({ className, ...props }: React.ComponentProps<"div
       setIsSendingOtp(true);
       await sendOtp(emailToUse, "register");
       setResendTimer(60);
-    } catch (error) {
-      // error handled in store
+    } catch {
+      // Thông báo lỗi được xử lý trong useAuthStore
     } finally {
       setIsSendingOtp(false);
     }
   };
 
-  // Final Sign Up Submission with OTP
   const onSignUpSubmit = async (data: SignUpFormValues) => {
     if (!otpCode || otpCode.trim().length !== 6) {
       toast.error("Vui lòng nhập đủ 6 chữ số mã OTP!");
@@ -296,12 +289,11 @@ export function AuthContainer({ className, ...props }: React.ComponentProps<"div
         otpCode.trim()
       );
       handleToggleMode("/signin");
-    } catch (error) {
-      // error handled in store
+    } catch {
+      // Thông báo lỗi được xử lý trong useAuthStore
     }
   };
 
-  // Forgot Password: Request OTP
   const handleRequestForgotOtp = async () => {
     if (!forgotEmail?.trim()) {
       toast.error("Bạn cần nhập đủ thông tin!");
@@ -316,14 +308,13 @@ export function AuthContainer({ className, ...props }: React.ComponentProps<"div
       await sendOtp(forgotEmail.trim(), "reset_password");
       setForgotStep(2);
       setForgotResendTimer(60);
-    } catch (error) {
-      // toast in store
+    } catch {
+      // Thông báo lỗi được xử lý trong useAuthStore
     } finally {
       setIsForgotLoading(false);
     }
   };
 
-  // Forgot Password: Resend OTP
   const handleResendForgotOtp = async () => {
     if (forgotResendTimer > 0 || isForgotLoading) return;
     const emailToUse = forgotEmail?.trim().toLowerCase();
@@ -335,14 +326,13 @@ export function AuthContainer({ className, ...props }: React.ComponentProps<"div
       setIsForgotLoading(true);
       await sendOtp(emailToUse, "reset_password");
       setForgotResendTimer(60);
-    } catch (error) {
-      // error handled in store
+    } catch {
+      // Thông báo lỗi được xử lý trong useAuthStore
     } finally {
       setIsForgotLoading(false);
     }
   };
 
-  // Forgot Password: Complete Reset
   const handleCompletePasswordReset = async () => {
     if (!forgotOtp?.trim() || !newPasswordVal || !confirmPasswordVal) {
       toast.error("Bạn cần nhập đủ thông tin!");
@@ -370,8 +360,8 @@ export function AuthContainer({ className, ...props }: React.ComponentProps<"div
       setNewPasswordVal("");
       setConfirmPasswordVal("");
       handleToggleMode("/signin");
-    } catch (error) {
-      // error handled in store
+    } catch {
+      // Thông báo lỗi được xử lý trong useAuthStore
     } finally {
       setIsForgotLoading(false);
     }
@@ -381,10 +371,6 @@ export function AuthContainer({ className, ...props }: React.ComponentProps<"div
     <div className={cn("w-full relative", className)} {...props}>
       <Card className="overflow-hidden p-0 border border-purple-500/30 bg-card/95 backdrop-blur-2xl shadow-2xl shadow-purple-500/15 rounded-3xl relative">
         <CardContent className="grid p-0 md:grid-cols-2 min-h-[530px] h-[530px] relative">
-          
-          {/* ========================================================= */}
-          {/* LEFT SIDE: Sign In Form (Positioned on Left 50%)          */}
-          {/* ========================================================= */}
           <div
             className={cn(
               "p-6 sm:p-8 flex flex-col justify-between h-full transition-opacity duration-300",
@@ -396,7 +382,6 @@ export function AuthContainer({ className, ...props }: React.ComponentProps<"div
               onSubmit={handleSubmitSignIn(onSignInSubmit, onSignInInvalid)}
             >
               <div className="space-y-4">
-                {/* Header */}
                 <div className="flex flex-col gap-1.5">
                   <Link to="/" className="flex items-center gap-2 w-fit group">
                     <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-purple-600 via-indigo-600 to-pink-500 flex items-center justify-center shadow-md shadow-purple-500/20 group-hover:scale-105 transition-transform p-1.5">
@@ -417,7 +402,6 @@ export function AuthContainer({ className, ...props }: React.ComponentProps<"div
                   </div>
                 </div>
 
-                {/* Fields */}
                 <div className="space-y-3 pt-1">
                   <div className="space-y-1">
                     <Label htmlFor="signin-username" className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
@@ -428,6 +412,7 @@ export function AuthContainer({ className, ...props }: React.ComponentProps<"div
                       <Input
                         id="signin-username"
                         type="text"
+                        autoComplete="username"
                         placeholder="Nhập tên đăng nhập..."
                         className="pl-9 h-9.5 rounded-xl bg-muted/40 border-border/80 text-xs focus:border-purple-500 focus:ring-purple-500/20"
                         {...registerSignIn("username")}
@@ -461,6 +446,7 @@ export function AuthContainer({ className, ...props }: React.ComponentProps<"div
                       <Input
                         id="signin-password"
                         type={showPassword ? "text" : "password"}
+                        autoComplete="current-password"
                         placeholder="••••••••"
                         className="pl-9 pr-9 h-9.5 rounded-xl bg-muted/40 border-border/80 text-xs focus:border-purple-500 focus:ring-purple-500/20"
                         {...registerSignIn("password")}
@@ -469,6 +455,7 @@ export function AuthContainer({ className, ...props }: React.ComponentProps<"div
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
                         className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                        aria-label={showPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
                         tabIndex={-1}
                       >
                         {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -482,7 +469,6 @@ export function AuthContainer({ className, ...props }: React.ComponentProps<"div
                   </div>
                 </div>
 
-                {/* Submit */}
                 <Button
                   type="submit"
                   disabled={isSubmittingSignIn}
@@ -502,7 +488,6 @@ export function AuthContainer({ className, ...props }: React.ComponentProps<"div
                 </Button>
               </div>
 
-              {/* Link */}
               <div className="pt-2 border-t border-border/40 text-center text-xs">
                 <span className="text-muted-foreground">Chưa có tài khoản? </span>
                 <button
@@ -516,9 +501,6 @@ export function AuthContainer({ className, ...props }: React.ComponentProps<"div
             </form>
           </div>
 
-          {/* ========================================================= */}
-          {/* RIGHT SIDE: Sign Up Form with OTP Step (Right 50%)       */}
-          {/* ========================================================= */}
           <div
             className={cn(
               "p-6 sm:p-8 flex flex-col justify-between h-full transition-opacity duration-300",
@@ -530,7 +512,6 @@ export function AuthContainer({ className, ...props }: React.ComponentProps<"div
               onSubmit={handleSubmitSignUp(onSignUpSubmit)}
             >
               <div className="space-y-2.5">
-                {/* Header */}
                 <div className="flex flex-col gap-1">
                   <Link to="/" className="flex items-center gap-2 w-fit group">
                     <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-purple-600 via-indigo-600 to-pink-500 flex items-center justify-center shadow-md shadow-purple-500/20 group-hover:scale-105 transition-transform p-1.5">
@@ -553,7 +534,6 @@ export function AuthContainer({ className, ...props }: React.ComponentProps<"div
                   </div>
                 </div>
 
-                {/* STEP 1: Registration Form Inputs */}
                 {signUpStep === 1 && (
                   <div className="space-y-2">
                     <div className="grid grid-cols-2 gap-2">
@@ -594,7 +574,6 @@ export function AuthContainer({ className, ...props }: React.ComponentProps<"div
                       </div>
                     </div>
 
-                    {/* Username Input */}
                     <div className="space-y-0.5">
                       <Label htmlFor="signup-username" className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
                         Tên đăng nhập
@@ -604,6 +583,7 @@ export function AuthContainer({ className, ...props }: React.ComponentProps<"div
                         <Input
                           id="signup-username"
                           type="text"
+                          autoComplete="username"
                           placeholder="nexus_user"
                           className="pl-9 h-8.5 rounded-xl bg-muted/40 border-border/80 text-xs focus:border-purple-500 focus:ring-purple-500/20"
                           {...registerSignUp("username", {
@@ -633,7 +613,6 @@ export function AuthContainer({ className, ...props }: React.ComponentProps<"div
                       ) : null}
                     </div>
 
-                    {/* Email Input */}
                     <div className="space-y-0.5">
                       <Label htmlFor="signup-email" className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
                         Email
@@ -643,6 +622,7 @@ export function AuthContainer({ className, ...props }: React.ComponentProps<"div
                         <Input
                           id="signup-email"
                           type="email"
+                          autoComplete="email"
                           placeholder="user@example.com"
                           className="pl-9 h-8.5 rounded-xl bg-muted/40 border-border/80 text-xs focus:border-purple-500 focus:ring-purple-500/20"
                           {...registerSignUp("email", {
@@ -672,7 +652,6 @@ export function AuthContainer({ className, ...props }: React.ComponentProps<"div
                       ) : null}
                     </div>
 
-                    {/* Password Input & Security Strength */}
                     <div className="space-y-0.5">
                       <Label htmlFor="signup-password" className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
                         Mật khẩu
@@ -682,6 +661,7 @@ export function AuthContainer({ className, ...props }: React.ComponentProps<"div
                         <Input
                           id="signup-password"
                           type={showPassword ? "text" : "password"}
+                          autoComplete="new-password"
                           placeholder="••••••••"
                           className="pl-9 pr-9 h-8.5 rounded-xl bg-muted/40 border-border/80 text-xs focus:border-purple-500 focus:ring-purple-500/20"
                           {...registerSignUp("password")}
@@ -690,13 +670,13 @@ export function AuthContainer({ className, ...props }: React.ComponentProps<"div
                           type="button"
                           onClick={() => setShowPassword(!showPassword)}
                           className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                          aria-label={showPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
                           tabIndex={-1}
                         >
                           {showPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
                         </button>
                       </div>
 
-                      {/* Live Security Strength Indicators */}
                       {signUpPasswordVal.length > 0 && (
                         <div className="flex items-center gap-1 pt-1 text-[9px]">
                           <span
@@ -739,7 +719,6 @@ export function AuthContainer({ className, ...props }: React.ComponentProps<"div
                       )}
                     </div>
 
-                    {/* Confirm Password Input */}
                     <div className="space-y-0.5">
                       <Label htmlFor="signup-confirm-password" className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
                         Nhập lại mật khẩu
@@ -749,6 +728,7 @@ export function AuthContainer({ className, ...props }: React.ComponentProps<"div
                         <Input
                           id="signup-confirm-password"
                           type={showSignUpConfirmPassword ? "text" : "password"}
+                          autoComplete="new-password"
                           placeholder="••••••••"
                           className="pl-9 pr-9 h-8.5 rounded-xl bg-muted/40 border-border/80 text-xs focus:border-purple-500 focus:ring-purple-500/20"
                           {...registerSignUp("confirmPassword")}
@@ -757,6 +737,7 @@ export function AuthContainer({ className, ...props }: React.ComponentProps<"div
                           type="button"
                           onClick={() => setShowSignUpConfirmPassword(!showSignUpConfirmPassword)}
                           className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                          aria-label={showSignUpConfirmPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
                           tabIndex={-1}
                         >
                           {showSignUpConfirmPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
@@ -790,7 +771,6 @@ export function AuthContainer({ className, ...props }: React.ComponentProps<"div
                   </div>
                 )}
 
-                {/* STEP 2: Enter OTP Code */}
                 {signUpStep === 2 && (
                   <div className="space-y-4 pt-2">
                     <div className="space-y-1.5">
@@ -861,7 +841,6 @@ export function AuthContainer({ className, ...props }: React.ComponentProps<"div
                 )}
               </div>
 
-              {/* Link */}
               <div className="pt-2 border-t border-border/40 text-center text-xs">
                 <span className="text-muted-foreground">Đã có tài khoản? </span>
                 <button
@@ -875,9 +854,6 @@ export function AuthContainer({ className, ...props }: React.ComponentProps<"div
             </form>
           </div>
 
-          {/* ========================================================================= */}
-          {/* FLOATING SLIDING PENGUIN MASCOT OVERLAY PANEL (DESKTOP ONLY)              */}
-          {/* ========================================================================= */}
           <div
             className={cn(
               "hidden md:flex absolute top-0 bottom-0 left-0 w-1/2 h-full bg-gradient-to-br from-purple-900/95 via-indigo-950 to-slate-950 text-white z-20 flex-col items-center justify-between p-6 sm:p-8 text-center shadow-2xl transition-transform duration-700 ease-[cubic-bezier(0.65,0,0.35,1)]",
@@ -886,11 +862,9 @@ export function AuthContainer({ className, ...props }: React.ComponentProps<"div
                 : "translate-x-full rounded-r-3xl rounded-l-none border-l border-white/10"
             )}
           >
-            {/* Background Glows */}
             <div className="absolute -top-16 -right-16 w-56 h-56 bg-purple-500/30 blur-[80px] rounded-full pointer-events-none" />
             <div className="absolute -bottom-16 -left-16 w-56 h-56 bg-indigo-500/30 blur-[80px] rounded-full pointer-events-none" />
 
-            {/* Main Penguin Mascot Display */}
             <div className="relative z-10 my-auto flex flex-col items-center gap-3.5">
               <div className="relative group">
                 <div className="absolute -inset-3 rounded-full bg-gradient-to-r from-purple-500 via-indigo-500 to-pink-500 opacity-40 blur-lg group-hover:opacity-75 transition duration-500 animate-pulse" />
@@ -928,18 +902,12 @@ export function AuthContainer({ className, ...props }: React.ComponentProps<"div
               Đồ án Công nghệ phần mềm 2026
             </div>
           </div>
-
         </CardContent>
       </Card>
 
-      {/* ========================================================= */}
-      {/* FORGOT PASSWORD MODAL OVERLAY                             */}
-      {/* ========================================================= */}
       {showForgotPassword && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-in fade-in duration-200">
           <div className="relative w-full max-w-md bg-card/95 border border-purple-500/30 rounded-3xl p-6 shadow-2xl space-y-5 text-foreground overflow-hidden">
-            
-            {/* Header */}
             <div className="flex items-center justify-between border-b border-border/40 pb-3">
               <div className="flex items-center gap-2">
                 <div className="p-2 rounded-xl bg-purple-500/10 border border-purple-500/20 text-purple-400">
@@ -954,12 +922,12 @@ export function AuthContainer({ className, ...props }: React.ComponentProps<"div
                 type="button"
                 onClick={() => setShowForgotPassword(false)}
                 className="p-1 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
+                aria-label="Đóng"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            {/* STEP 1: Enter Email */}
             {forgotStep === 1 && (
               <div className="space-y-4">
                 <div className="space-y-1.5">
@@ -971,6 +939,7 @@ export function AuthContainer({ className, ...props }: React.ComponentProps<"div
                     <Input
                       id="forgot-email"
                       type="email"
+                      autoComplete="email"
                       placeholder="user@example.com"
                       value={forgotEmail}
                       onChange={(e) => setForgotEmail(e.target.value)}
@@ -1010,14 +979,12 @@ export function AuthContainer({ className, ...props }: React.ComponentProps<"div
               </div>
             )}
 
-            {/* STEP 2: Enter OTP & New Password */}
             {forgotStep === 2 && (
               <div className="space-y-3.5">
                 <div className="text-xs text-muted-foreground">
                   Mã OTP đã được gửi đến: <strong className="text-purple-400">{forgotEmail}</strong>
                 </div>
 
-                {/* OTP Input */}
                 <div className="space-y-1">
                   <Label htmlFor="forgot-otp" className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
                     Mã OTP 6 chữ số
@@ -1036,7 +1003,6 @@ export function AuthContainer({ className, ...props }: React.ComponentProps<"div
                   </div>
                 </div>
 
-                {/* New Password */}
                 <div className="space-y-1">
                   <Label htmlFor="new-password" className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
                     Mật khẩu mới
@@ -1046,6 +1012,7 @@ export function AuthContainer({ className, ...props }: React.ComponentProps<"div
                     <Input
                       id="new-password"
                       type={showNewPassword ? "text" : "password"}
+                      autoComplete="new-password"
                       placeholder="••••••••"
                       value={newPasswordVal}
                       onChange={(e) => setNewPasswordVal(e.target.value)}
@@ -1055,13 +1022,13 @@ export function AuthContainer({ className, ...props }: React.ComponentProps<"div
                       type="button"
                       onClick={() => setShowNewPassword(!showNewPassword)}
                       className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                      aria-label={showNewPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
                     >
                       {showNewPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                     </button>
                   </div>
                 </div>
 
-                {/* Confirm Password */}
                 <div className="space-y-1">
                   <Label htmlFor="confirm-password" className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
                     Xác nhận mật khẩu mới
@@ -1071,6 +1038,7 @@ export function AuthContainer({ className, ...props }: React.ComponentProps<"div
                     <Input
                       id="confirm-password"
                       type={showNewPassword ? "text" : "password"}
+                      autoComplete="new-password"
                       placeholder="••••••••"
                       value={confirmPasswordVal}
                       onChange={(e) => setConfirmPasswordVal(e.target.value)}
