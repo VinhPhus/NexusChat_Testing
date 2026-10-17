@@ -6,7 +6,9 @@ export const config = {
     Playwright: {
       browser: 'chromium',
       url: 'http://localhost:5173',
-      show: true
+      show: true,
+      waitForTimeout: 10000,
+      pressKeyDelay: 0
     }
   },
   include: {
