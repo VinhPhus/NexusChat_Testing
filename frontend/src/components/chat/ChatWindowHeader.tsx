@@ -9,21 +9,16 @@ import GroupChatAvatar from "./GroupChatAvatar";
 import { useSocketStore } from "@/stores/useSocketStore";
 import { useFriendStore } from "@/stores/useFriendStore";
 import { useCallStore } from "@/stores/useCallStore";
-import { Phone, Video } from "lucide-react";
-import { useState } from "react";
+import { Phone, Video, ArrowLeft } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
-import { Input } from "../ui/input";
 import { Button } from "../ui/button";
-import { userService } from "@/services/userService";
 import { chatService } from "@/services/chatService";
 import { toast } from "sonner";
-import { Settings, Ban, Flame, Pencil, Edit3, Sparkles, Loader2, UserPlus, PowerOff } from "lucide-react";
+import { Flame, Sparkles, Loader2, UserPlus, PowerOff, Ghost } from "lucide-react";
 import { isNoteExpired, isStreakActive, isStreakOnFire, formatLastActive, getEffectiveStatus, cn } from "@/lib/utils";
-import { Label } from "../ui/label";
 import { useProfileStore } from "@/stores/useProfileStore";
 import VoiceRoomListPopover from "./VoiceRoomListPopover";
-import { useEffect, useRef } from "react";
-import { Ghost } from "lucide-react";
 
 const IncognitoTimer = ({ expiresAt, onExpire }: { expiresAt: string, onExpire: () => void }) => {
   const [timeLeft, setTimeLeft] = useState("");
@@ -55,7 +50,7 @@ const IncognitoTimer = ({ expiresAt, onExpire }: { expiresAt: string, onExpire: 
 };
 
 const ChatWindowHeader = ({ chat }: { chat?: Conversation }) => {
-  const { conversations, activeConversationId } = useChatStore();
+  const { conversations, activeConversationId, setActiveConversation } = useChatStore();
   const { user } = useAuthStore();
   const { onlineUsers, lastActiveMap } = useSocketStore();
   const { startCall, activeCall, activeGroupCalls, joinExistingCall } = useCallStore();
@@ -81,8 +76,18 @@ const ChatWindowHeader = ({ chat }: { chat?: Conversation }) => {
 
   if (!chat) {
     return (
-      <header className="md:hidden sticky top-0 z-10 flex items-center gap-2 px-4 py-2 w-full">
-        <SidebarTrigger className="-ml-1 text-foreground" />
+      <header className="sticky top-0 z-10 flex items-center gap-2 px-3 sm:px-4 py-2 w-full">
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon"
+          onClick={() => setActiveConversation(null)}
+          className="md:hidden -ml-2 mr-1 h-8 w-8 rounded-full text-foreground hover:bg-muted shrink-0 cursor-pointer"
+          title="Quay lại"
+        >
+          <ArrowLeft className="size-4" />
+        </Button>
+        <SidebarTrigger className="-ml-1 text-foreground hidden md:inline-flex" />
       </header>
     );
   }
@@ -97,8 +102,18 @@ const ChatWindowHeader = ({ chat }: { chat?: Conversation }) => {
     if (!user || !otherUser) {
       return (
         <header className="sticky top-0 z-10 flex flex-col w-full bg-background border-b border-border/50">
-          <div className="px-4 py-2 flex items-center gap-2 w-full">
-            <SidebarTrigger className="-ml-1 text-foreground shrink-0" />
+          <div className="px-3 sm:px-4 py-2 flex items-center gap-2 w-full">
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              onClick={() => setActiveConversation(null)}
+              className="md:hidden -ml-2 mr-1 h-8 w-8 rounded-full text-foreground hover:bg-muted shrink-0 cursor-pointer"
+              title="Quay lại"
+            >
+              <ArrowLeft className="size-4" />
+            </Button>
+            <SidebarTrigger className="-ml-1 text-foreground shrink-0 hidden md:inline-flex" />
             <span className="font-semibold text-sm text-foreground">Đoạn chat</span>
           </div>
         </header>
@@ -180,15 +195,26 @@ const ChatWindowHeader = ({ chat }: { chat?: Conversation }) => {
 
   return (
     <header className={cn("sticky top-0 z-10 flex flex-col w-full border-b border-border/50 transition-colors duration-500", isIncognito ? "bg-zinc-950/90 backdrop-blur-md" : "bg-background")}>
-      <div className="px-4 py-2 flex items-center gap-2 w-full justify-between overflow-hidden">
-        <div className="flex items-center gap-2 min-w-0">
-          <SidebarTrigger className="-ml-1 text-foreground shrink-0" />
+      <div className="px-3 sm:px-4 py-2 flex items-center gap-2 w-full justify-between overflow-hidden">
+        <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            onClick={() => setActiveConversation(null)}
+            className="md:hidden -ml-1 sm:-ml-2 mr-0.5 h-8 w-8 rounded-full text-foreground hover:bg-muted shrink-0 cursor-pointer"
+            title="Quay lại danh sách"
+          >
+            <ArrowLeft className="size-4" />
+          </Button>
+
+          <SidebarTrigger className="-ml-1 text-foreground shrink-0 hidden md:inline-flex" />
           <Separator
             orientation="vertical"
-            className="mr-2 data-[orientation=vertical]:h-4 shrink-0"
+            className="mr-2 data-[orientation=vertical]:h-4 shrink-0 hidden md:block"
           />
 
-          <div className="p-2 flex items-center gap-3 min-w-0">
+          <div className="p-1 sm:p-2 flex items-center gap-2.5 sm:gap-3 min-w-0">
             {/* avatar */}
             <div className="relative shrink-0">
               {chat.type === "direct" ? (
@@ -247,7 +273,7 @@ const ChatWindowHeader = ({ chat }: { chat?: Conversation }) => {
               <div className="flex items-center gap-1.5 flex-wrap">
                 <h2
                   className={cn(
-                    "font-semibold text-foreground truncate max-w-[220px] leading-snug",
+                    "font-semibold text-foreground truncate max-w-[130px] sm:max-w-[220px] md:max-w-xs leading-snug text-sm sm:text-base",
                     !isIncognito && "cursor-pointer hover:underline"
                   )}
                   onClick={() => {
@@ -385,7 +411,7 @@ const ChatWindowHeader = ({ chat }: { chat?: Conversation }) => {
         )}
       </div>
 
-      {/* Stranger Friend Request Banner matching exact screenshot */}
+      {/* Friend Request Banner for Strangers */}
       {chat?.type === "direct" && otherUser && !isFriend && (
         <div className="flex items-center justify-between px-4 py-2.5 bg-muted/40 border-t border-border/40 text-xs">
           <div className="flex items-center gap-2 text-foreground font-medium">

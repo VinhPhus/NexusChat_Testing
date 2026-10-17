@@ -39,11 +39,9 @@ const ChatWindowBody = () => {
 
     const activeTypingUsers = (activeConversationId ? typingUsers[activeConversationId] : []) || [];
 
-    // ref
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
 
-    // seen status
     useEffect(() => {
         const lastMessage = selectedConvo?.lastMessage;
         if (!lastMessage) {
@@ -64,7 +62,6 @@ const ChatWindowBody = () => {
         }
     }, [selectedConvo, onlineUsers, user]);
 
-    // screen capture protection for incognito mode
     const [isBlurred, setIsBlurred] = useState(false);
 
     useEffect(() => {
@@ -109,7 +106,6 @@ const ChatWindowBody = () => {
         };
     }, [selectedConvo?.type, selectedConvo?.incognitoMode?.isActive, activeConversationId]);
 
-    // kéo xuống dưới khi load convo
     useLayoutEffect(() => {
         if (!messagesEndRef.current) return;
 
@@ -205,10 +201,10 @@ const ChatWindowBody = () => {
             )}
 
             {pinnedMessages.length > 0 && (
-                <div className="px-4 pt-3 pb-1 z-20">
+                <div className="px-2 sm:px-4 pt-2 sm:pt-3 pb-1 z-20">
                     <Popover>
                         <PopoverTrigger asChild>
-                            <div className="bg-background/95 shadow-sm border px-4 py-2 flex items-center gap-3 cursor-pointer hover:bg-muted/50 transition-colors rounded-xl">
+                            <div className="bg-background/95 shadow-sm border px-3 sm:px-4 py-2 flex items-center gap-2.5 sm:gap-3 cursor-pointer hover:bg-muted/50 transition-colors rounded-xl">
                                 <div className="shrink-0 p-1.5 bg-primary/10 text-primary rounded-full">
                                     <Pin className="size-4" />
                                 </div>
@@ -222,7 +218,7 @@ const ChatWindowBody = () => {
                                 </div>
                             </div>
                         </PopoverTrigger>
-                        <PopoverContent align="start" className="w-[calc(100vw-2rem)] sm:w-[400px] max-h-[60vh] overflow-y-auto beautiful-scrollbar p-2 z-50 ml-4 mt-1">
+                        <PopoverContent align="start" className="w-[calc(100vw-1.5rem)] sm:w-[400px] max-h-[60vh] overflow-y-auto beautiful-scrollbar p-2 z-50 ml-2 sm:ml-4 mt-1">
                             <div className="space-y-2">
                                 {pinnedMessages.map((msg) => {
                                     const sender = selectedConvo?.participants?.find(p => (p?._id || (p as any)?.userId?._id)?.toString() === msg.senderId?.toString());
@@ -252,7 +248,7 @@ const ChatWindowBody = () => {
                 id="scrollableDiv"
                 ref={containerRef}
                 onScroll={handleScrollSave}
-                className="flex-1 w-full flex flex-col-reverse overflow-y-auto overflow-x-hidden beautiful-scrollbar px-4 sm:px-6 py-3 z-10"
+                className="flex-1 w-full flex flex-col-reverse overflow-y-auto overflow-x-hidden beautiful-scrollbar px-2 sm:px-6 py-2 sm:py-3 z-10"
             >
                 <div ref={messagesEndRef}></div>
 

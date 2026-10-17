@@ -58,7 +58,7 @@ const ChatWindowLayout = () => {
   if (isLocked && !isUnlockedLocally) {
     return (
       <div className="flex w-full h-full overflow-hidden relative">
-        <SidebarInset className="flex flex-col h-full flex-1 overflow-hidden rounded-sm shadow-md transition-all duration-300">
+        <SidebarInset className="flex flex-col h-full flex-1 overflow-hidden rounded-none md:rounded-sm shadow-none md:shadow-md transition-all duration-300">
           <LockedChatScreen conversationId={activeConversationId as string} />
         </SidebarInset>
         <ProfileSidebar />
@@ -68,19 +68,12 @@ const ChatWindowLayout = () => {
 
   return (
     <div className="flex w-full h-full overflow-hidden relative">
-      <SidebarInset className="flex flex-col h-full flex-1 overflow-hidden rounded-sm shadow-md transition-all duration-300">
-        {/* Header */}
+      <SidebarInset className="flex flex-col h-full flex-1 overflow-hidden rounded-none md:rounded-sm shadow-none md:shadow-md transition-all duration-300">
         <ChatWindowHeader chat={selectedConvo} />
-
-        {/* Offline & Sync Status Banner */}
         <OfflineBanner />
-
-        {/* Body */}
-        <div className="flex-1 overflow-y-auto bg-primary-foreground">
+        <div className="flex-1 overflow-y-auto bg-primary-foreground min-h-0">
           <ChatWindowBody />
         </div>
-
-        {/* Footer */}
         <MessageInput selectedConvo={selectedConvo} />
       </SidebarInset>
 

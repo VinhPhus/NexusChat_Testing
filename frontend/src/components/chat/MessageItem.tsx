@@ -449,10 +449,9 @@ const MessageItem = ({
           </div>
         )}
 
-        {/* tin nhắn */}
         <div
           className={cn(
-            "max-w-xs lg:max-w-md space-y-1 flex flex-col group relative",
+            "max-w-[85%] sm:max-w-xs md:max-w-md space-y-1 flex flex-col group relative",
             message.isOwn ? "items-end" : "items-start"
           )}
         >
@@ -911,9 +910,8 @@ const MessageItem = ({
               </div>
             )}
 
-            {/* Hover Actions */}
             {!message.isRecalled && (
-              <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
+              <div className="opacity-70 sm:opacity-0 sm:group-hover:opacity-100 hover:opacity-100 transition-opacity flex items-center gap-1">
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" size="icon" className="size-7 rounded-full bg-background shadow-sm border text-muted-foreground hover:text-foreground">

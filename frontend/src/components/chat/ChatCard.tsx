@@ -139,12 +139,11 @@ const ChatCard = ({
                 {isMuted && <BellOff className="size-3.5 text-muted-foreground" />}
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <div onClick={(e) => e.stopPropagation()} className="p-1 rounded-full hover:bg-accent/50 cursor-pointer text-muted-foreground opacity-0 group-hover:opacity-100 transition-smooth">
+                    <div onClick={(e) => e.stopPropagation()} className="p-1 rounded-full hover:bg-accent/50 cursor-pointer text-muted-foreground opacity-70 sm:opacity-0 sm:group-hover:opacity-100 hover:opacity-100 transition-smooth">
                       <MoreHorizontal className="size-4 hover:size-5" />
                     </div>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-56 rounded-xl p-1.5 shadow-2xl">
-                    {/* 0. Ghim trò chuyện */}
                     <DropdownMenuItem
                       className="cursor-pointer rounded-lg"
                       onClick={(e) => {
@@ -171,7 +170,6 @@ const ChatCard = ({
                       )}
                     </DropdownMenuItem>
 
-                    {/* 0.5. Tạo nhóm với người này */}
                     {!isGroup && targetUser && (
                       <DropdownMenuItem
                         className="cursor-pointer rounded-lg font-medium text-xs text-purple-300 hover:text-purple-200"
@@ -185,7 +183,6 @@ const ChatCard = ({
                       </DropdownMenuItem>
                     )}
 
-                    {/* 1. Lưu trữ đoạn chat */}
                     <DropdownMenuItem
                       className="cursor-pointer rounded-lg"
                       onClick={(e) => {
@@ -198,7 +195,6 @@ const ChatCard = ({
                       Lưu trữ đoạn chat
                     </DropdownMenuItem>
 
-                    {/* 2. Tắt thông báo (Sub Menu) */}
                     {isMuted ? (
                       <DropdownMenuItem
                         className="cursor-pointer rounded-lg"
@@ -263,7 +259,6 @@ const ChatCard = ({
                       </DropdownMenuSub>
                     )}
 
-                    {/* 3. Báo cáo xấu */}
                     <DropdownMenuItem
                       className="cursor-pointer rounded-lg text-rose-400 focus:text-rose-300"
                       onClick={(e) => {
@@ -277,7 +272,6 @@ const ChatCard = ({
 
                     <DropdownMenuSeparator />
 
-                    {/* 4. Xóa đoạn chat */}
                     <DropdownMenuItem
                       className="cursor-pointer rounded-lg"
                       onClick={(e) => {

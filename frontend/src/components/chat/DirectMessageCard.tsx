@@ -8,12 +8,14 @@ import StatusBadge from "./StatusBadge";
 import UnreadCountBadge from "./UnreadCountBadge";
 import { useSocketStore } from "@/stores/useSocketStore";
 import { Flame } from "lucide-react";
+import { useSidebar } from "../ui/sidebar";
 
 const DirectMessageCard = ({ convo }: { convo: Conversation }) => {
   const { user } = useAuthStore();
   const { activeConversationId, setActiveConversation, messages, fetchMessages } =
     useChatStore();
   const { onlineUsers, lastActiveMap } = useSocketStore();
+  const { setOpenMobile } = useSidebar();
 
   if (!user) return null;
 
@@ -42,6 +44,7 @@ const DirectMessageCard = ({ convo }: { convo: Conversation }) => {
 
   const handleSelectConversation = async (id: string) => {
     setActiveConversation(id);
+    setOpenMobile(false);
     if (!messages[id]) {
       await fetchMessages(id);
     }

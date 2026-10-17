@@ -6,7 +6,7 @@ const ChatWelcomeScreen = () => {
   return (
     <SidebarInset className="flex w-full h-full bg-transparent">
       <ChatWindowHeader />
-      <div className="flex bg-primary-foreground rounded-2xl flex-1 items-center justify-center">
+      <div className="flex bg-primary-foreground rounded-none md:rounded-2xl flex-1 items-center justify-center p-4">
         <div className="text-center">
           <div className="size-24 mx-auto mb-6 bg-gradient-to-tr from-purple-600 via-indigo-600 to-pink-500 rounded-full flex items-center justify-center shadow-lg shadow-purple-500/20 pulse-ring">
             <PenguinIcon className="size-14 text-white drop-shadow-md" />

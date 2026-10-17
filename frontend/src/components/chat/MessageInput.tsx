@@ -28,7 +28,6 @@ import {
   Send,
   Mic,
   MicVocal,
-  Square,
   Loader2,
   BarChart2,
   Plus,
@@ -40,9 +39,7 @@ import {
   Reply,
   Pencil,
   FileText,
-  Trash2,
   CalendarClock,
-  Sparkles,
 } from "lucide-react";
 import { Dialog, DialogContent, DialogTitle } from "../ui/dialog";
 import { cn } from "@/lib/utils";
@@ -114,15 +111,11 @@ const MessageInput = ({ selectedConvo }: { selectedConvo: Conversation }) => {
   }, [selectedConvo._id, editingMessage]);
 
   const [isRecording, setIsRecording] = useState(false);
-  const [recordingTime, setRecordingTime] = useState(0);
   const [isSendingMedia, setIsSendingMedia] = useState(false);
-  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const isCancelledRef = useRef(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const attachmentInputRef = useRef<HTMLInputElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  const chunksRef = useRef<BlobPart[]>([]);
-  const timerRef = useRef<any>(null);
 
   const [expiresIn, setExpiresIn] = useState<number | undefined>(undefined);
   const [isViewOnce, setIsViewOnce] = useState(false);
@@ -158,14 +151,9 @@ const MessageInput = ({ selectedConvo }: { selectedConvo: Conversation }) => {
 
   useEffect(() => {
     return () => {
-      if (timerRef.current) clearInterval(timerRef.current);
-      if (mediaRecorderRef.current && mediaRecorderRef.current.state === "recording") {
-        isCancelledRef.current = true;
-        mediaRecorderRef.current.stop();
-      }
       stagedImages.forEach((img) => URL.revokeObjectURL(img.previewUrl));
     };
-  }, []);
+  }, [stagedImages]);
 
   if (!user) return null;
 
@@ -601,27 +589,8 @@ const MessageInput = ({ selectedConvo }: { selectedConvo: Conversation }) => {
     }
   };
 
-    const startRecording = () => {
-      setIsRecording(true);
-    };
-
-  const stopRecording = () => {
-    if (mediaRecorderRef.current && mediaRecorderRef.current.state === "recording") {
-      isCancelledRef.current = false;
-      mediaRecorderRef.current.stop();
-      setIsRecording(false);
-      if (timerRef.current) clearInterval(timerRef.current);
-    }
-  };
-
-  const cancelRecording = () => {
-    if (mediaRecorderRef.current && mediaRecorderRef.current.state === "recording") {
-      isCancelledRef.current = true;
-      mediaRecorderRef.current.stop();
-      setIsRecording(false);
-      if (timerRef.current) clearInterval(timerRef.current);
-      toast.info("Đã hủy ghi âm");
-    }
+  const startRecording = () => {
+    setIsRecording(true);
   };
 
   const getFilteredParticipants = () => {
@@ -1036,7 +1005,7 @@ const MessageInput = ({ selectedConvo }: { selectedConvo: Conversation }) => {
       )}
 
       {/* Input bar */}
-      <div className="flex items-center gap-2 p-3 min-h-[56px]">
+      <div className="flex items-center gap-1.5 sm:gap-2 p-2 sm:p-3 min-h-[50px] sm:min-h-[56px]">
         {/* Hidden inputs */}
         <input
           type="file"
@@ -1303,7 +1272,7 @@ const MessageInput = ({ selectedConvo }: { selectedConvo: Conversation }) => {
                 value={value}
                 onChange={handleInputChange}
                 placeholder="Soạn tin nhắn..."
-                className="pr-10 h-9 bg-white dark:bg-background border-border/50 focus:border-primary/50 transition-smooth resize-none rounded-xl"
+                className="pr-10 h-9 text-base sm:text-sm bg-white dark:bg-background border-border/50 focus:border-primary/50 transition-smooth resize-none rounded-xl"
               />
               <div className="absolute right-2 top-1/2 transform -translate-y-1/2 flex items-center">
                 <EmojiPicker
@@ -1346,19 +1315,34 @@ const MessageInput = ({ selectedConvo }: { selectedConvo: Conversation }) => {
           </Button>
         )}
 
-        <Button
-          type="button"
-          onMouseDown={(e) => e.preventDefault()}
-          onClick={() => sendMessage()}
-          className="bg-gradient-chat hover:shadow-glow transition-smooth hover:scale-105 shrink-0 rounded-xl cursor-pointer"
-          disabled={isRecording || isSendingMedia || !hasDraftOrMedia}
-        >
-          {isSendingMedia ? (
-            <Loader2 className="size-4 animate-spin text-white" />
-          ) : (
-            <Send className="size-4 text-white" />
-          )}
-        </Button>
+        {hasDraftOrMedia ? (
+          <Button
+            type="button"
+            onMouseDown={(e) => e.preventDefault()}
+            onClick={() => sendMessage()}
+            className="bg-gradient-chat hover:shadow-glow transition-smooth hover:scale-105 shrink-0 rounded-xl cursor-pointer"
+            disabled={isRecording || isSendingMedia}
+            title="Gửi tin nhắn"
+          >
+            {isSendingMedia ? (
+              <Loader2 className="size-4 animate-spin text-white" />
+            ) : (
+              <Send className="size-4 text-white" />
+            )}
+          </Button>
+        ) : (
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            onClick={startRecording}
+            className="shrink-0 rounded-xl hover:bg-orange-500/10 hover:text-orange-500 text-muted-foreground transition-all cursor-pointer"
+            disabled={isRecording}
+            title="Ghi âm tin nhắn thoại"
+          >
+            <Mic className="size-5" />
+          </Button>
+        )}
 
         <CreatePollModal
           open={showPollModal}

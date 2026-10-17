@@ -4,11 +4,13 @@ import type { Conversation } from "@/types/chat";
 import ChatCard from "./ChatCard";
 import UnreadCountBadge from "./UnreadCountBadge";
 import GroupChatAvatar from "./GroupChatAvatar";
+import { useSidebar } from "../ui/sidebar";
 
 const GroupChatCard = ({ convo }: { convo: Conversation }) => {
   const { user } = useAuthStore();
   const { activeConversationId, setActiveConversation, messages, fetchMessages } =
     useChatStore();
+  const { setOpenMobile } = useSidebar();
 
   if (!user) return null;
 
@@ -17,6 +19,7 @@ const GroupChatCard = ({ convo }: { convo: Conversation }) => {
 
   const handleSelectConversation = async (id: string) => {
     setActiveConversation(id);
+    setOpenMobile(false);
     if (!messages[id]) {
       await fetchMessages(id);
     }

@@ -98,10 +98,8 @@ const ConversationList = () => {
 
   return (
     <div className="flex flex-col h-full min-h-0 overflow-hidden">
-      {/* 4 Nút chuyển đổi Tab (Dynamic Expanding Style) */}
       <div className="px-2 py-1.5 mb-1">
         <div className="flex w-full gap-1 p-1 bg-muted/40 backdrop-blur-sm rounded-xl border border-border/40 overflow-hidden">
-          {/* 1. Tab Tất cả (All) */}
           <button
             type="button"
             onClick={() => setActiveTab("all")}
@@ -126,7 +124,6 @@ const ConversationList = () => {
             )}
           </button>
 
-          {/* 2. Tab Bạn bè */}
           <button
             type="button"
             onClick={() => setActiveTab("direct")}
@@ -151,7 +148,6 @@ const ConversationList = () => {
             )}
           </button>
 
-          {/* 3. Tab Nhóm */}
           <button
             type="button"
             onClick={() => setActiveTab("group")}
@@ -176,7 +172,6 @@ const ConversationList = () => {
             )}
           </button>
 
-          {/* 4. Tab Kênh */}
           <button
             type="button"
             onClick={() => setActiveTab("channel")}
@@ -203,7 +198,6 @@ const ConversationList = () => {
         </div>
       </div>
 
-      {/* Danh sách các đoạn chat */}
       <div className="flex-1 overflow-y-auto beautiful-scrollbar p-2 space-y-2">
         {filteredConversations.length === 0 ? (
           <div className="p-6 text-center text-xs text-muted-foreground">
