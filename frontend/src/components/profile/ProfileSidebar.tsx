@@ -15,6 +15,16 @@ import StatusBadge from "../chat/StatusBadge";
 import GroupChatAvatar from "../chat/GroupChatAvatar";
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "../ui/alert-dialog";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import { userService } from "@/services/userService";
@@ -47,6 +57,11 @@ const ProfileSidebar = () => {
   const [showSharedMedia, setShowSharedMedia] = useState(false);
   const [showShareContact, setShowShareContact] = useState(false);
   const [sharedMediaTab, setSharedMediaTab] = useState<"media" | "docs" | "links">("media");
+  const [pendingUserAction, setPendingUserAction] = useState<{
+    type: "block" | "unfriend";
+    userId: string;
+    displayName: string;
+  } | null>(null);
 
   const [showLockDialog, setShowLockDialog] = useState(false);
   const [newPin, setNewPin] = useState("");
@@ -99,19 +114,39 @@ const ProfileSidebar = () => {
     if (isBlocked) {
       await unblockUser(targetUser._id);
     } else {
-      await blockUser(targetUser._id);
+      setPendingUserAction({
+        type: "block",
+        userId: targetUser._id,
+        displayName: targetUser.displayName || "người này",
+      });
     }
   };
 
   const handleUnfriend = async () => {
     if (!targetUser) return;
-    if (window.confirm(`Bạn có chắc chắn muốn xóa bạn với ${targetUser.displayName || "người này"} không?`)) {
-      try {
-        await removeFriend(targetUser._id);
-        toast.success("Đã xóa bạn bè thành công");
-      } catch (err: any) {
-        toast.error(err.response?.data?.message || "Lỗi khi xóa bạn bè");
-      }
+    setPendingUserAction({
+      type: "unfriend",
+      userId: targetUser._id,
+      displayName: targetUser.displayName || "người này",
+    });
+  };
+
+  const handleConfirmUserAction = async () => {
+    if (!pendingUserAction) return;
+
+    const action = pendingUserAction;
+    setPendingUserAction(null);
+
+    if (action.type === "block") {
+      await blockUser(action.userId);
+      return;
+    }
+
+    try {
+      await removeFriend(action.userId);
+      toast.success("Đã xóa bạn bè thành công");
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || "Lỗi khi xóa bạn bè");
     }
   };
 
@@ -744,6 +779,37 @@ const ProfileSidebar = () => {
           sharedContactId={targetUser._id}
         />
       )}
+
+      <AlertDialog
+        open={!!pendingUserAction}
+        onOpenChange={(open) => {
+          if (!open) setPendingUserAction(null);
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {pendingUserAction?.type === "block"
+                ? `Chặn ${pendingUserAction.displayName}?`
+                : `Xóa bạn với ${pendingUserAction?.displayName}?`}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {pendingUserAction?.type === "block"
+                ? "Bạn có chắc chắn muốn chặn người dùng này không?"
+                : "Bạn có chắc chắn muốn xóa người này khỏi danh sách bạn bè không?"}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Không</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={handleConfirmUserAction}
+            >
+              Đồng ý
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
