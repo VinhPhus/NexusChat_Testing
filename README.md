@@ -123,6 +123,14 @@
 
 ---
 
+## 📚 Tài Liệu Kỹ Thuật (Documentation)
+
+- [Tài liệu Đặc tả Yêu cầu Phần mềm (SRS.md)](file:///c:/Chat_Realtime/NexusChat_Testing/SRS.md) — *Tuân thủ tiêu chuẩn IEEE Std 830-1998 / ISO/IEC/IEEE 29148:2018 với đầy đủ 13 phân hệ, sơ đồ ERD, Use Cases và Ma trận truy vết kiểm thử (RTM).*
+- [Đặc tả Kỹ thuật Hệ thống (PROJECT_SPEC.md)](file:///c:/Chat_Realtime/NexusChat_Testing/PROJECT_SPEC.md) — *Tổng hợp kiến trúc Monorepo, Data Models, API Endpoints và Socket Events.*
+- [Báo cáo Kiểm thử & Test Cases (docs/)](file:///c:/Chat_Realtime/NexusChat_Testing/docs) — *Bao gồm Manual Test Cases (.docx), Automated Test Cases (CodeceptJS) và Postman Collection.*
+
+---
+
 ## 👥 Nhóm Phát Triển
 
 - **Huỳnh Nhất Huy** (Leader) - Kiến trúc dự án, Xác thực, Thời gian thực (Real-time) & Trí tuệ nhân tạo (AI)
@@ -132,3 +140,4 @@
 ---
 
 *Dự án này được xây dựng như một Đồ án thực tế bộ môn Công Nghệ Phần Mềm (CNPM) — Trường Đại Học Giao Thông Vận Tải TP.HCM 2026.*
+
