@@ -8,6 +8,7 @@ export const config = {
       url: 'http://localhost:5173',
       show: true,
       waitForTimeout: 10000,
+      actionTimeout: 15000,
       pressKeyDelay: 0
     }
   },

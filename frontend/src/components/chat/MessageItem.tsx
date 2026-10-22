@@ -914,7 +914,7 @@ const MessageItem = ({
               <div className="opacity-70 sm:opacity-0 sm:group-hover:opacity-100 hover:opacity-100 transition-opacity flex items-center gap-1">
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon" className="size-7 rounded-full bg-background shadow-sm border text-muted-foreground hover:text-foreground">
+                    <Button variant="ghost" size="icon" className="message-options-btn size-7 rounded-full bg-background shadow-sm border text-muted-foreground hover:text-foreground">
                       <MoreHorizontal className="size-3.5" />
                     </Button>
                   </DropdownMenuTrigger>
