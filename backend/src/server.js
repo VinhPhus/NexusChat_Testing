@@ -118,24 +118,43 @@ io.on("connection", (socket) => {
     }
   });
 
-  socket.on("typing-start", ({ conversationId, participantIds }) => {
-    if (conversationId && userId && Array.isArray(participantIds)) {
-      participantIds.forEach(pId => {
-        if (pId !== userId) {
-          socket.to(`user:${pId}`).emit("typing-start", { conversationId, userId });
+  const relayTypingStatus = async (eventName, conversationId, participantIds) => {
+    if (!conversationId || !userId || !Array.isArray(participantIds)) return;
+
+    const senderId = userId.toString();
+    const recipientIds = [...new Set(
+      participantIds
+        .map((participantId) => participantId?.toString())
+        .filter((participantId) => participantId && participantId !== senderId)
+    )];
+
+    try {
+      const blockedRecipients = eventName === "typing-start"
+        ? await User.find({
+          _id: { $in: recipientIds },
+          blockedUsers: senderId,
+        }).select("_id").lean()
+        : [];
+      const blockedRecipientIds = new Set(
+        blockedRecipients.map((recipient) => recipient._id.toString())
+      );
+
+      recipientIds.forEach((recipientId) => {
+        if (!blockedRecipientIds.has(recipientId)) {
+          socket.to(`user:${recipientId}`).emit(eventName, { conversationId, userId });
         }
       });
+    } catch (error) {
+      console.error(`[Socket] Không thể chuyển tiếp sự kiện ${eventName}:`, error);
     }
+  };
+
+  socket.on("typing-start", ({ conversationId, participantIds } = {}) => {
+    relayTypingStatus("typing-start", conversationId, participantIds);
   });
 
-  socket.on("typing-end", ({ conversationId, participantIds }) => {
-    if (conversationId && userId && Array.isArray(participantIds)) {
-      participantIds.forEach(pId => {
-        if (pId !== userId) {
-          socket.to(`user:${pId}`).emit("typing-end", { conversationId, userId });
-        }
-      });
-    }
+  socket.on("typing-end", ({ conversationId, participantIds } = {}) => {
+    relayTypingStatus("typing-end", conversationId, participantIds);
   });
 
   // Đăng ký handlers cho cuộc gọi

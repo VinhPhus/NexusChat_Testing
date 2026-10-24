@@ -1,4 +1,5 @@
 import User from "../models/User.js";
+import Conversation from "../models/Conversation.js";
 import cloudinary from "../libs/cloudinary.js";
 import fs from "fs";
 import bcrypt from "bcrypt";
@@ -19,6 +20,7 @@ export const authMe = async (req, res) => {
     return res.status(500).json({ message: "Lỗi hệ thống" });
   }
 };
+
 
 export const getUserCount = async (req, res) => {
   try {
@@ -352,13 +354,27 @@ export const blockUser = async (req, res) => {
       return res.status(400).json({ message: "Không thể chặn chính mình" });
     }
 
+    const directConversations = await Conversation.find({
+      type: "direct",
+      "participants.userId": { $all: [userId, id] },
+    }).select("_id").lean();
+
     const user = await User.findById(userId);
     if (!user.blockedUsers.includes(id)) {
       user.blockedUsers.push(id);
       await user.save();
     }
 
-    req.app.get("io").to(`user:${userId}`).emit("user:updated", user);
+    const io = req.app.get("io");
+    if (io) {
+      io.to(`user:${userId}`).emit("user:updated", user);
+      directConversations.forEach((conversation) => {
+        io.to(`user:${userId}`).emit("typing-end", {
+          conversationId: conversation._id,
+          userId: id,
+        });
+      });
+    }
 
     return res.status(200).json({ message: "Đã chặn người dùng", blockedUsers: user.blockedUsers });
   } catch (error) {
@@ -681,4 +697,3 @@ export const reactProfilePhoto = async (req, res) => {
     return res.status(500).json({ message: "Lỗi hệ thống khi tương tác ảnh" });
   }
 };
-
