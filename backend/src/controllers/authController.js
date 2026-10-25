@@ -48,6 +48,30 @@ const validateEmail = (email) => {
   return "";
 };
 
+const validatePassword = (password) => {
+  if (!password || !password.trim()) {
+    return "Mật khẩu không được để trống";
+  }
+
+  if (password.length < 6) {
+    return "Mật khẩu phải có ít nhất 6 ký tự";
+  }
+
+  if (!/[A-Z]/.test(password)) {
+    return "Mật khẩu phải chứa ít nhất 1 chữ hoa (A-Z)";
+  }
+
+  if (!/[a-z]/.test(password)) {
+    return "Mật khẩu phải chứa ít nhất 1 chữ thường (a-z)";
+  }
+
+  if (!/[0-9]/.test(password)) {
+    return "Mật khẩu phải chứa ít nhất 1 chữ số (0-9)";
+  }
+
+  return "";
+};
+
 // Kiểm tra Tên đăng nhập trùng lặp
 export const checkUsername = async (req, res) => {
   try {
@@ -200,6 +224,11 @@ export const signUp = async (req, res) => {
       return res.status(400).json({ message: emailValidationMessage });
     }
 
+    const passwordValidationMessage = validatePassword(password);
+    if (passwordValidationMessage) {
+      return res.status(400).json({ message: passwordValidationMessage });
+    }
+
     const emailTrimmed = email.trim().toLowerCase();
 
     // Kiểm tra mã OTP
@@ -249,8 +278,9 @@ export const resetPassword = async (req, res) => {
       return res.status(400).json({ message: "Thiếu email, otp hoặc mật khẩu mới" });
     }
 
-    if (newPassword.length < 6) {
-      return res.status(400).json({ message: "Mật khẩu mới phải có ít nhất 6 ký tự" });
+    const passwordValidationMessage = validatePassword(newPassword);
+    if (passwordValidationMessage) {
+      return res.status(400).json({ message: passwordValidationMessage });
     }
 
     const emailTrimmed = email.trim().toLowerCase();

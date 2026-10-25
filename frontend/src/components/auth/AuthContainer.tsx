@@ -151,6 +151,10 @@ export function AuthContainer({ className, ...props }: React.ComponentProps<"div
   const hasLowercase = /[a-z]/.test(signUpPasswordVal);
   const hasNumber = /[0-9]/.test(signUpPasswordVal);
 
+  const forgotHasUppercase = /[A-Z]/.test(newPasswordVal);
+  const forgotHasLowercase = /[a-z]/.test(newPasswordVal);
+  const forgotHasNumber = /[0-9]/.test(newPasswordVal);
+
   const handleCheckUsernameBlur = async () => {
     const val = getValuesSignUp("username")?.trim();
     if (!val || val.length < 3) {
@@ -344,6 +348,18 @@ export function AuthContainer({ className, ...props }: React.ComponentProps<"div
     }
     if (newPasswordVal.length < 6) {
       toast.error("Mật khẩu mới phải có ít nhất 6 ký tự!");
+      return;
+    }
+    if (!/[A-Z]/.test(newPasswordVal)) {
+      toast.error("Mật khẩu phải chứa ít nhất 1 chữ hoa (A-Z)!");
+      return;
+    }
+    if (!/[a-z]/.test(newPasswordVal)) {
+      toast.error("Mật khẩu phải chứa ít nhất 1 chữ thường (a-z)!");
+      return;
+    }
+    if (!/[0-9]/.test(newPasswordVal)) {
+      toast.error("Mật khẩu phải chứa ít nhất 1 chữ số (0-9)!");
       return;
     }
     if (newPasswordVal !== confirmPasswordVal) {
@@ -1027,6 +1043,41 @@ export function AuthContainer({ className, ...props }: React.ComponentProps<"div
                       {showNewPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                     </button>
                   </div>
+
+                  {newPasswordVal.length > 0 && (
+                    <div className="flex items-center gap-1 pt-1 text-[9px]">
+                      <span
+                        className={cn(
+                          "px-1.5 py-0.5 rounded-md font-medium border flex items-center gap-0.5 transition-colors",
+                          forgotHasUppercase
+                            ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/30"
+                            : "bg-muted/30 text-muted-foreground/60 border-border/40"
+                        )}
+                      >
+                        {forgotHasUppercase ? "✓" : "✗"} Chữ hoa (A-Z)
+                      </span>
+                      <span
+                        className={cn(
+                          "px-1.5 py-0.5 rounded-md font-medium border flex items-center gap-0.5 transition-colors",
+                          forgotHasLowercase
+                            ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/30"
+                            : "bg-muted/30 text-muted-foreground/60 border-border/40"
+                        )}
+                      >
+                        {forgotHasLowercase ? "✓" : "✗"} Chữ thường (a-z)
+                      </span>
+                      <span
+                        className={cn(
+                          "px-1.5 py-0.5 rounded-md font-medium border flex items-center gap-0.5 transition-colors",
+                          forgotHasNumber
+                            ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/30"
+                            : "bg-muted/30 text-muted-foreground/60 border-border/40"
+                        )}
+                      >
+                        {forgotHasNumber ? "✓" : "✗"} Chữ số (0-9)
+                      </span>
+                    </div>
+                  )}
                 </div>
 
                 <div className="space-y-1">

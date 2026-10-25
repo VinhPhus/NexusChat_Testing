@@ -415,6 +415,18 @@ export const changePasswordWithOtp = async (req, res) => {
       return res.status(400).json({ message: "Mật khẩu mới phải có ít nhất 6 ký tự" });
     }
 
+    if (!/[A-Z]/.test(newPassword)) {
+      return res.status(400).json({ message: "Mật khẩu phải chứa ít nhất 1 chữ hoa (A-Z)" });
+    }
+
+    if (!/[a-z]/.test(newPassword)) {
+      return res.status(400).json({ message: "Mật khẩu phải chứa ít nhất 1 chữ thường (a-z)" });
+    }
+
+    if (!/[0-9]/.test(newPassword)) {
+      return res.status(400).json({ message: "Mật khẩu phải chứa ít nhất 1 chữ số (0-9)" });
+    }
+
     const emailTrimmed = email.trim().toLowerCase();
     const otpRecord = await Otp.findOne({ email: emailTrimmed, otp, type: "change_password" });
     if (!otpRecord) {

@@ -153,6 +153,18 @@ const PrivacySettings = () => {
       toast.error("Mật khẩu mới phải có ít nhất 6 ký tự!");
       return;
     }
+    if (!/[A-Z]/.test(newPw)) {
+      toast.error("Mật khẩu phải chứa ít nhất 1 chữ hoa (A-Z)!");
+      return;
+    }
+    if (!/[a-z]/.test(newPw)) {
+      toast.error("Mật khẩu phải chứa ít nhất 1 chữ thường (a-z)!");
+      return;
+    }
+    if (!/[0-9]/.test(newPw)) {
+      toast.error("Mật khẩu phải chứa ít nhất 1 chữ số (0-9)!");
+      return;
+    }
     if (newPw !== confirmPw) {
       toast.error("Mật khẩu xác nhận không khớp!");
       return;
