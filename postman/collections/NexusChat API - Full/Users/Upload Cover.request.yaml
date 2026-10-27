@@ -1,0 +1,10 @@
+$kind: http-request
+url: "{{baseUrl}}/api/users/uploadCover"
+method: POST
+body:
+  type: formdata
+  content:
+    - type: file
+      key: file
+      src: []
+order: 11000

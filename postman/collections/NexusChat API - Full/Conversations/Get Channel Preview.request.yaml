@@ -1,0 +1,6 @@
+$kind: http-request
+url: "{{baseUrl}}/api/conversations/preview/:id"
+method: GET
+pathVariables:
+  id: ID_HERE
+order: 4000

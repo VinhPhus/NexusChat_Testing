@@ -1,0 +1,6 @@
+$kind: http-request
+url: "{{baseUrl}}/api/conversations/:conversationId/seen"
+method: PATCH
+pathVariables:
+  conversationId: ID_HERE
+order: 11000

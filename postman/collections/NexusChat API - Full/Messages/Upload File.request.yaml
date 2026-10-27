@@ -1,0 +1,10 @@
+$kind: http-request
+url: "{{baseUrl}}/api/messages/upload-file"
+method: POST
+body:
+  type: formdata
+  content:
+    - type: file
+      key: file
+      src: []
+order: 10000

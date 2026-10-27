@@ -1,0 +1,12 @@
+$kind: http-request
+url: "{{baseUrl}}/api/calls/token"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: text
+  content: |-
+    {
+      "conversationId": "ID_HERE"
+    }
+order: 1000

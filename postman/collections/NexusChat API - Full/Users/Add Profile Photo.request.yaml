@@ -1,0 +1,10 @@
+$kind: http-request
+url: "{{baseUrl}}/api/users/photos"
+method: POST
+body:
+  type: formdata
+  content:
+    - type: file
+      key: file
+      src: []
+order: 13000

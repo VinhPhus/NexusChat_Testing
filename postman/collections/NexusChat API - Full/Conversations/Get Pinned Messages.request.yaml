@@ -1,0 +1,6 @@
+$kind: http-request
+url: "{{baseUrl}}/api/conversations/:conversationId/messages/pinned"
+method: GET
+pathVariables:
+  conversationId: ID_HERE
+order: 9000

@@ -1,0 +1,31 @@
+$kind: http-request
+name: "TC_BVA_04: msg_len=1999 (Max-), file_size=10MB (Nom)"
+url: "{{baseUrl}}/api/messages/direct"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: text
+  content: |-
+    {
+      "recipientId": "{{receiverId}}",
+      "content": "{{msg1999}}",
+      "fileUrl": "https://drive.google.com/test_10mb.pdf",
+      "fileName": "doc_10mb.pdf",
+      "fileSize": 10485760
+    }
+scripts:
+  - type: beforeRequest
+    code: |-
+      var str1999 = "A".repeat(1999);
+      pm.collectionVariables.set("msg1999", str1999);
+    language: text/javascript
+  - type: afterResponse
+    code: |-
+      pm.test("HTTP 201 - Chấp nhận chuỗi dài 1999 ký tự", function () {
+          pm.response.to.have.status(201);
+      });
+      var jsonData = pm.response.json();
+      pm.expect(jsonData.message.content.length).to.eql(1999);
+    language: text/javascript
+order: 4000

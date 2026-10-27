@@ -1,0 +1,32 @@
+$kind: http-request
+name: "TC_BVA_06: msg_len=500 (Nom), file_size=1MB (Min)"
+url: "{{baseUrl}}/api/messages/direct"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: text
+  content: |-
+    {
+      "recipientId": "{{receiverId}}",
+      "content": "{{msg500}}",
+      "fileUrl": "https://drive.google.com/test_1mb.pdf",
+      "fileName": "doc_1mb.pdf",
+      "fileSize": 1048576
+    }
+scripts:
+  - type: beforeRequest
+    code: |-
+      if (!pm.collectionVariables.get("msg500")) {
+          pm.collectionVariables.set("msg500", "X".repeat(500));
+      }
+    language: text/javascript
+  - type: afterResponse
+    code: |-
+      pm.test("HTTP 201 - Gửi thành công tệp kích thước tối thiểu 1MB", function () {
+          pm.response.to.have.status(201);
+      });
+      var jsonData = pm.response.json();
+      pm.expect(jsonData.message.fileSize).to.eql(1048576);
+    language: text/javascript
+order: 6000

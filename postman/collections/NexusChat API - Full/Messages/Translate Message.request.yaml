@@ -1,0 +1,14 @@
+$kind: http-request
+url: "{{baseUrl}}/api/messages/:messageId/translate"
+method: POST
+headers:
+  Content-Type: application/json
+pathVariables:
+  messageId: ID_HERE
+body:
+  type: text
+  content: |-
+    {
+      "targetLang": "vi"
+    }
+order: 17000

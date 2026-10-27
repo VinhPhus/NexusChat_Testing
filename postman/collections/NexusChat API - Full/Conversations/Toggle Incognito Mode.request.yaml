@@ -1,0 +1,6 @@
+$kind: http-request
+url: "{{baseUrl}}/api/conversations/:id/incognito"
+method: POST
+pathVariables:
+  id: ID_HERE
+order: 27000

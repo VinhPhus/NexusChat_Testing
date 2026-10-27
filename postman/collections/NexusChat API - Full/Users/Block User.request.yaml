@@ -1,0 +1,6 @@
+$kind: http-request
+url: "{{baseUrl}}/api/users/:id/block"
+method: POST
+pathVariables:
+  id: ID_HERE
+order: 19000

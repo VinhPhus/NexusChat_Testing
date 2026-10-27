@@ -1,0 +1,6 @@
+$kind: http-request
+url: "{{baseUrl}}/api/users/:id/unblock"
+method: POST
+pathVariables:
+  id: ID_HERE
+order: 20000

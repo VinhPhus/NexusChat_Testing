@@ -1,0 +1,6 @@
+$kind: http-request
+url: "{{baseUrl}}/api/friends/requests/:requestId/decline"
+method: POST
+pathVariables:
+  requestId: ID_HERE
+order: 3000

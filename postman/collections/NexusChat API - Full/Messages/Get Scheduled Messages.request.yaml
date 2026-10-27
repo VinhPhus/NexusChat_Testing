@@ -1,0 +1,4 @@
+$kind: http-request
+url: "{{baseUrl}}/api/messages/scheduled"
+method: GET
+order: 2000

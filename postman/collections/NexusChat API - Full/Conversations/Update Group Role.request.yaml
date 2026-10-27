@@ -1,0 +1,15 @@
+$kind: http-request
+url: "{{baseUrl}}/api/conversations/:id/role"
+method: PATCH
+headers:
+  Content-Type: application/json
+pathVariables:
+  id: ID_HERE
+body:
+  type: text
+  content: |-
+    {
+      "memberId": "ID_HERE",
+      "role": "deputy"
+    }
+order: 17000

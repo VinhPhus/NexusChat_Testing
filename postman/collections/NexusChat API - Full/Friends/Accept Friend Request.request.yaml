@@ -1,0 +1,6 @@
+$kind: http-request
+url: "{{baseUrl}}/api/friends/requests/:requestId/accept"
+method: POST
+pathVariables:
+  requestId: ID_HERE
+order: 2000

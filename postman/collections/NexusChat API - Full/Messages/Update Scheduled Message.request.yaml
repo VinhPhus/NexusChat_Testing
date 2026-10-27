@@ -1,0 +1,14 @@
+$kind: http-request
+url: "{{baseUrl}}/api/messages/scheduled/:id"
+method: PUT
+headers:
+  Content-Type: application/json
+pathVariables:
+  id: ID_HERE
+body:
+  type: text
+  content: |-
+    {
+      "content": "Updated"
+    }
+order: 5000

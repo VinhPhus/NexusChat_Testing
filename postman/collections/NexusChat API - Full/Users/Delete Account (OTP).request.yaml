@@ -1,0 +1,12 @@
+$kind: http-request
+url: "{{baseUrl}}/api/users/me"
+method: DELETE
+headers:
+  Content-Type: application/json
+body:
+  type: text
+  content: |-
+    {
+      "otp": "123456"
+    }
+order: 5000

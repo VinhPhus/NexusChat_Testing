@@ -1,0 +1,15 @@
+$kind: http-request
+url: "{{baseUrl}}/api/conversations/:id/info"
+method: PATCH
+headers:
+  Content-Type: application/json
+pathVariables:
+  id: ID_HERE
+body:
+  type: text
+  content: |-
+    {
+      "name": "New Name",
+      "description": "Desc"
+    }
+order: 18000

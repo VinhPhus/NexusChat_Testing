@@ -1,0 +1,8 @@
+$kind: http-request
+url: "{{baseUrl}}/api/conversations/:conversationId/messages/search?q=hello"
+method: GET
+queryParams:
+  q: hello
+pathVariables:
+  conversationId: ID_HERE
+order: 10000

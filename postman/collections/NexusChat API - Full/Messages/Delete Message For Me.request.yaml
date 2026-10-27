@@ -1,0 +1,6 @@
+$kind: http-request
+url: "{{baseUrl}}/api/messages/:messageId/delete-for-me"
+method: POST
+pathVariables:
+  messageId: ID_HERE
+order: 15000

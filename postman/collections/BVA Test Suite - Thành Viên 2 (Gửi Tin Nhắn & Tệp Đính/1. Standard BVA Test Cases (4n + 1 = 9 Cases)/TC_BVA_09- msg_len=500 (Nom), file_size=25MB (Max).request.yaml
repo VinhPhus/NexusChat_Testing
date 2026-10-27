@@ -1,0 +1,26 @@
+$kind: http-request
+name: "TC_BVA_09: msg_len=500 (Nom), file_size=25MB (Max)"
+url: "{{baseUrl}}/api/messages/direct"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: text
+  content: |-
+    {
+      "recipientId": "{{receiverId}}",
+      "content": "{{msg500}}",
+      "fileUrl": "https://drive.google.com/test_25mb.zip",
+      "fileName": "doc_25mb.zip",
+      "fileSize": 26214400
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("HTTP 201 - Chấp nhận tệp đúng ngưỡng trần 25MB", function () {
+          pm.response.to.have.status(201);
+      });
+      var jsonData = pm.response.json();
+      pm.expect(jsonData.message.fileSize).to.eql(26214400);
+    language: text/javascript
+order: 9000

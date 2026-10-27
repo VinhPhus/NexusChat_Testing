@@ -1,0 +1,17 @@
+$kind: collection
+name: BVA Test Suite - Thành Viên 2 (Gửi Tin Nhắn & Tệp Đính Kèm)
+description: "Bộ kịch bản kiểm thử giá trị biên tự động hóa dành riêng cho Thành viên 2: Gửi tin nhắn & Tệp đính kèm (Chat & Upload). Tuân thủ nghiêm ngặt công thức Standard BVA (4n + 1 = 9 cases) và mở rộng Robustness BVA."
+variables:
+  baseUrl: http://localhost:5000
+  accessToken: ""
+  receiverId: 66bcde1234567890abcdef02
+  msg500: ""
+  msg1999: ""
+  msg2000: ""
+  msg2001: ""
+auth:
+  - id: a8a7b7ee-838f-46bd-a900-10ac9c2ca12f
+    type: bearer
+    name: bearer auth
+    credentials:
+      token: "{{accessToken}}"

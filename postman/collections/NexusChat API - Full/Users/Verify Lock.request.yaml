@@ -1,0 +1,14 @@
+$kind: http-request
+url: "{{baseUrl}}/api/users/verify-lock/:conversationId"
+method: POST
+headers:
+  Content-Type: application/json
+pathVariables:
+  conversationId: ID_HERE
+body:
+  type: text
+  content: |-
+    {
+      "passcode": "123456"
+    }
+order: 17000

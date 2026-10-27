@@ -1,0 +1,13 @@
+$kind: http-request
+url: "{{baseUrl}}/api/friends/requests"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: text
+  content: |-
+    {
+      "to": "ID_HERE",
+      "message": "Hi"
+    }
+order: 1000

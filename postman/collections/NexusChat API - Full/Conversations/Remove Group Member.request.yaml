@@ -1,0 +1,7 @@
+$kind: http-request
+url: "{{baseUrl}}/api/conversations/:id/members/:memberId"
+method: DELETE
+pathVariables:
+  id: ID_HERE
+  memberId: ID_HERE
+order: 15000

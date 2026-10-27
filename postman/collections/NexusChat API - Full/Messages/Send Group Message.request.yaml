@@ -1,0 +1,13 @@
+$kind: http-request
+url: "{{baseUrl}}/api/messages/group"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: text
+  content: |-
+    {
+      "conversationId": "ID_HERE",
+      "content": "Hello Group"
+    }
+order: 7000

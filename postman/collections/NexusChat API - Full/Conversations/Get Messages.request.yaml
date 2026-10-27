@@ -1,0 +1,8 @@
+$kind: http-request
+url: "{{baseUrl}}/api/conversations/:conversationId/messages?limit=50"
+method: GET
+queryParams:
+  limit: "50"
+pathVariables:
+  conversationId: ID_HERE
+order: 8000

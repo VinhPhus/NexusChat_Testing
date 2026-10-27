@@ -1,0 +1,30 @@
+$kind: http-request
+url: "{{baseUrl}}/api/auth/signin"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: text
+  content: |-
+    {
+      "username": "duy123",
+      "password": "Duy3101"
+    }
+auth:
+  type: noauth
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Đăng nhập thành công - HTTP 200", function () {
+          pm.response.to.have.status(200);
+      });
+
+      var jsonData = pm.response.json();
+      var token = jsonData.token || (jsonData.user && jsonData.user.token);
+      if (token) {
+          pm.collectionVariables.set("accessToken", token);
+          pm.environment.set("accessToken", token);
+          console.log("Saved accessToken:", token);
+      }
+    language: text/javascript
+order: 1000

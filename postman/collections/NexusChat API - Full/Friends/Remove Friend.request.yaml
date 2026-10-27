@@ -1,0 +1,6 @@
+$kind: http-request
+url: "{{baseUrl}}/api/friends/:friendId"
+method: DELETE
+pathVariables:
+  friendId: ID_HERE
+order: 6000

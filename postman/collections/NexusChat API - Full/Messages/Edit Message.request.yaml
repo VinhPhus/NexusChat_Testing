@@ -1,0 +1,14 @@
+$kind: http-request
+url: "{{baseUrl}}/api/messages/:messageId/edit"
+method: POST
+headers:
+  Content-Type: application/json
+pathVariables:
+  messageId: ID_HERE
+body:
+  type: text
+  content: |-
+    {
+      "content": "Edited content"
+    }
+order: 18000

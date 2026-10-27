@@ -1,0 +1,29 @@
+$kind: http-request
+name: "TC_ROB_02: msg_len=2001 (Max+1), file_size=10MB (Nom)"
+url: "{{baseUrl}}/api/messages/direct"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: text
+  content: |-
+    {
+      "recipientId": "{{receiverId}}",
+      "content": "{{msg2001}}",
+      "fileUrl": "https://drive.google.com/test_10mb.pdf",
+      "fileName": "doc_10mb.pdf",
+      "fileSize": 10485760
+    }
+scripts:
+  - type: beforeRequest
+    code: |-
+      var str2001 = "Z".repeat(2001);
+      pm.collectionVariables.set("msg2001", str2001);
+    language: text/javascript
+  - type: afterResponse
+    code: |-
+      pm.test("Kiểm soát dữ liệu vượt ngưỡng 2000 ký tự (HTTP 201 tự cắt chuỗi hoặc HTTP 400)", function () {
+          pm.expect(pm.response.code).to.be.oneOf([201, 400]);
+      });
+    language: text/javascript
+order: 2000

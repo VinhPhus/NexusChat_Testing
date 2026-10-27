@@ -1,0 +1,14 @@
+$kind: http-request
+url: "{{baseUrl}}/api/messages/:messageId/vote"
+method: POST
+headers:
+  Content-Type: application/json
+pathVariables:
+  messageId: ID_HERE
+body:
+  type: text
+  content: |-
+    {
+      "optionIndex": 0
+    }
+order: 16000

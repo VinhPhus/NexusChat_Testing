@@ -1,0 +1,15 @@
+$kind: http-request
+url: "{{baseUrl}}/api/users/:userId/photos/:photoId/react"
+method: POST
+headers:
+  Content-Type: application/json
+pathVariables:
+  userId: ID_HERE
+  photoId: ID_HERE
+body:
+  type: text
+  content: |-
+    {
+      "emoji": "❤️"
+    }
+order: 15000

@@ -1,0 +1,6 @@
+$kind: http-request
+url: "{{baseUrl}}/api/users/reset-lock/:conversationId"
+method: POST
+pathVariables:
+  conversationId: ID_HERE
+order: 18000

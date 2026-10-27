@@ -1,0 +1,7 @@
+$kind: http-request
+url: "{{baseUrl}}/api/conversations/:id/voice-rooms/:roomId"
+method: DELETE
+pathVariables:
+  id: ID_HERE
+  roomId: ID_HERE
+order: 26000

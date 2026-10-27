@@ -1,0 +1,15 @@
+$kind: http-request
+name: "TC_ROB_03: Upload tệp rỗng 0 Byte (Min-1)"
+url: "{{baseUrl}}/api/messages/upload-file"
+method: POST
+body:
+  type: formdata
+  content: []
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("HTTP 400 - Từ chối tải tệp rỗng không có nội dung", function () {
+          pm.response.to.have.status(400);
+      });
+    language: text/javascript
+order: 3000

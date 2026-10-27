@@ -1,0 +1,12 @@
+$kind: http-request
+url: "{{baseUrl}}/api/users/note"
+method: PUT
+headers:
+  Content-Type: application/json
+body:
+  type: text
+  content: |-
+    {
+      "note": "New note"
+    }
+order: 12000

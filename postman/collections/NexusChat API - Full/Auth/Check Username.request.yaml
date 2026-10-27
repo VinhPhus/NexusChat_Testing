@@ -1,0 +1,12 @@
+$kind: http-request
+url: "{{baseUrl}}/api/auth/check-username"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: text
+  content: |-
+    {
+      "username": "testuser1"
+    }
+order: 1000

@@ -1,0 +1,15 @@
+$kind: http-request
+url: "{{baseUrl}}/api/conversations/:id/nickname"
+method: POST
+headers:
+  Content-Type: application/json
+pathVariables:
+  id: ID_HERE
+body:
+  type: text
+  content: |-
+    {
+      "targetUserId": "ID_HERE",
+      "nickname": "Bro"
+    }
+order: 13000

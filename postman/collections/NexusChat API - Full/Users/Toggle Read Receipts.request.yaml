@@ -1,0 +1,4 @@
+$kind: http-request
+url: "{{baseUrl}}/api/users/read-receipts"
+method: PUT
+order: 8000

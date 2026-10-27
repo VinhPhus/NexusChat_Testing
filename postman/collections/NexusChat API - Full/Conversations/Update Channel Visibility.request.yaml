@@ -1,0 +1,14 @@
+$kind: http-request
+url: "{{baseUrl}}/api/conversations/:id/visibility"
+method: PATCH
+headers:
+  Content-Type: application/json
+pathVariables:
+  id: ID_HERE
+body:
+  type: text
+  content: |-
+    {
+      "isPublic": true
+    }
+order: 6000

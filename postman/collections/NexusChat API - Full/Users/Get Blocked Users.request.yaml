@@ -1,0 +1,4 @@
+$kind: http-request
+url: "{{baseUrl}}/api/users/me/blocked"
+method: GET
+order: 7000

@@ -1,0 +1,12 @@
+$kind: http-request
+url: "{{baseUrl}}/api/conversations/:id/wallpaper"
+method: POST
+pathVariables:
+  id: ID_HERE
+body:
+  type: formdata
+  content:
+    - type: file
+      key: image
+      src: []
+order: 12000

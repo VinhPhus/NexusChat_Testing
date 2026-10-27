@@ -1,0 +1,15 @@
+$kind: http-request
+url: "{{baseUrl}}/api/conversations/:id/voice-rooms/:roomId"
+method: PUT
+headers:
+  Content-Type: application/json
+pathVariables:
+  id: ID_HERE
+  roomId: ID_HERE
+body:
+  type: text
+  content: |-
+    {
+      "name": "Room 1 updated"
+    }
+order: 25000

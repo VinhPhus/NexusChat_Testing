@@ -1,0 +1,23 @@
+$kind: http-request
+name: "TC_ROB_01: msg_len=0 (Min-1), file_size=0 (Không kèm tệp)"
+url: "{{baseUrl}}/api/messages/direct"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: text
+  content: |-
+    {
+      "recipientId": "{{receiverId}}",
+      "content": ""
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("HTTP 400 - Từ chối khi không có nội dung và không có tệp đính kèm", function () {
+          pm.response.to.have.status(400);
+      });
+      var jsonData = pm.response.json();
+      pm.expect(jsonData.message).to.include("Thiếu nội dung hoặc file đính kèm");
+    language: text/javascript
+order: 1000
