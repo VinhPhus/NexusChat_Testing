@@ -1,0 +1,678 @@
+{
+	"info": {
+		"_postman_id": "bva-vinhphu-nexuschat-security-profile",
+		"name": "BVA Testing - Vĩnh Phú: Hồ sơ & Bảo mật (NexusChat)",
+		"description": "Bộ kiểm thử tự động Boundary Value Analysis (BVA) theo tài liệu test-case_BVA_VinhPhu_HoSoBaoMat.md của Vĩnh Phú cho hệ thống NexusChat.\n\nBao gồm:\n- 13 Standard BVA Test Cases (4n + 1 với n = 3 biến: display_name, bio, lock_timeout)\n- 5 Robustness BVA Test Cases (Min-1, Max+1 kiểm tra ngoại lệ bắt lỗi).",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{bearerToken}}",
+				"type": "string"
+			}
+		]
+	},
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:5002",
+			"type": "string"
+		},
+		{
+			"key": "bearerToken",
+			"value": "",
+			"type": "string"
+		}
+	],
+	"item": [
+		{
+			"name": "1. Standard BVA (13 Cases - 4n + 1)",
+			"description": "Kiểm thử các giá trị biên hợp lệ [Min, Min+, Nom, Max-, Max] của 3 biến đầu vào.",
+			"item": [
+				{
+					"name": "Case 01: lock_timeout tại Min (1 phút)",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"displayName\": \"Nguyen Van Binh\",\n  \"bio\": \"Hello, I am using NexusChat !!\",\n  \"lock_timeout\": 1\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/users/me",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "users", "me"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 OK\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Update profile and lock_timeout successfully at Min = 1\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.be.an(\"object\");",
+									"    pm.expect(jsonData.user.displayName).to.eql(\"Nguyen Van Binh\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "Case 02: lock_timeout tại Min+ (2 phút)",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"displayName\": \"Nguyen Van Binh\",\n  \"bio\": \"Hello, I am using NexusChat !!\",\n  \"lock_timeout\": 2\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/users/me",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "users", "me"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 OK\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Update profile and lock_timeout successfully at Min+ = 2\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.be.an(\"object\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "Case 03: Tất cả các biến tại Nom (Chuẩn: 15 ký tự, 30 ký tự, 15 phút)",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"displayName\": \"Nguyen Van Binh\",\n  \"bio\": \"Hello, I am using NexusChat !!\",\n  \"lock_timeout\": 15\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/users/me",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "users", "me"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 OK (Nominal Case)\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"All nominal inputs accepted\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.user.displayName).to.eql(\"Nguyen Van Binh\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "Case 04: lock_timeout tại Max- (59 phút)",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"displayName\": \"Nguyen Van Binh\",\n  \"bio\": \"Hello, I am using NexusChat !!\",\n  \"lock_timeout\": 59\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/users/me",
+							"path": ["api", "users", "me"],
+							"host": ["{{baseUrl}}"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 OK\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"lock_timeout Max- (59m) accepted\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.user).to.be.an(\"object\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "Case 05: lock_timeout tại Max (60 phút)",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"displayName\": \"Nguyen Van Binh\",\n  \"bio\": \"Hello, I am using NexusChat !!\",\n  \"lock_timeout\": 60\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/users/me",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "users", "me"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 OK\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"lock_timeout Max (60m) accepted\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.user).to.be.an(\"object\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "Case 06: bio tại Min (0 ký tự - để trống)",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"displayName\": \"Nguyen Van Binh\",\n  \"bio\": \"\",\n  \"lock_timeout\": 15\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/users/me",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "users", "me"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 OK\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Empty bio allowed at Min = 0\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.user.bio).to.eql(\"\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "Case 07: bio tại Min+ (1 ký tự)",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"displayName\": \"Nguyen Van Binh\",\n  \"bio\": \".\",\n  \"lock_timeout\": 15\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/users/me",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "users", "me"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 OK\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Bio with 1 char accepted\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.user.bio).to.eql(\".\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "Case 08: bio tại Max- (59 ký tự)",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"displayName\": \"Nguyen Van Binh\",\n  \"bio\": \"Lap trinh vien Fullstack dam me cong nghe va he thong chat 59\",\n  \"lock_timeout\": 15\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/users/me",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "users", "me"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 OK\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Bio with 59 chars accepted\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.user.bio.length).to.eql(59);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "Case 09: bio tại Max (60 ký tự)",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"displayName\": \"Nguyen Van Binh\",\n  \"bio\": \"Lap trinh vien Fullstack dam me cong nghe va he thong chat _60\",\n  \"lock_timeout\": 15\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/users/me",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "users", "me"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 OK\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Bio with 60 chars accepted\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.user.bio.length).to.eql(60);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "Case 10: display_name tại Min (2 ký tự)",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"displayName\": \"An\",\n  \"bio\": \"Hello, I am using NexusChat !!\",\n  \"lock_timeout\": 15\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/users/me",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "users", "me"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 OK\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"display_name with Min = 2 chars accepted\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.user.displayName).to.eql(\"An\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "Case 11: display_name tại Min+ (3 ký tự)",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"displayName\": \"Huy\",\n  \"bio\": \"Hello, I am using NexusChat !!\",\n  \"lock_timeout\": 15\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/users/me",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "users", "me"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 OK\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"display_name with Min+ = 3 chars accepted\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.user.displayName).to.eql(\"Huy\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "Case 12: display_name tại Max- (29 ký tự)",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"displayName\": \"Nguyen Hoang Thien Kim Long29\",\n  \"bio\": \"Hello, I am using NexusChat !!\",\n  \"lock_timeout\": 15\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/users/me",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "users", "me"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 OK\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"display_name with Max- = 29 chars accepted\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.user.displayName.length).to.eql(29);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "Case 13: display_name tại Max (30 ký tự)",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"displayName\": \"Nguyen Hoang Thien Kim Long_30\",\n  \"bio\": \"Hello, I am using NexusChat !!\",\n  \"lock_timeout\": 15\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/users/me",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "users", "me"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 OK\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"display_name with Max = 30 chars accepted\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.user.displayName.length).to.eql(30);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "2. Robustness BVA (5 Cases - Min-1 & Max+1)",
+			"description": "Kiểm thử các giá trị ngoài biên phạm vi để kiểm tra cơ chế bắt lỗi và bảo vệ hệ thống.",
+			"item": [
+				{
+					"name": "TC_ROB_01: display_name dưới biên Min-1 (1 ký tự)",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"displayName\": \"A\",\n  \"bio\": \"Hello, I am using NexusChat !!\",\n  \"lock_timeout\": 15\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/users/me",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "users", "me"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400 Bad Request for short display_name\", function () {",
+									"    pm.expect([400, 422]).to.include(pm.response.code);",
+									"});",
+									"",
+									"pm.test(\"Response returns validation error message\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property(\"message\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "TC_ROB_02: display_name vượt biên Max+1 (31 ký tự)",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"displayName\": \"Nguyen Hoang Thien Kim Long_31x\",\n  \"bio\": \"Hello, I am using NexusChat !!\",\n  \"lock_timeout\": 15\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/users/me",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "users", "me"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400 Bad Request for exceeding max length\", function () {",
+									"    pm.expect([400, 422]).to.include(pm.response.code);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "TC_ROB_03: bio vượt biên Max+1 (61 ký tự)",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"displayName\": \"Nguyen Van Binh\",\n  \"bio\": \"Lap trinh vien Fullstack dam me cong nghe va he thong chat __61\",\n  \"lock_timeout\": 15\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/users/me",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "users", "me"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Reject bio longer than 60 chars or truncate\", function () {",
+									"    if (pm.response.code === 200) {",
+									"        var jsonData = pm.response.json();",
+									"        pm.expect(jsonData.user.bio.length).to.be.at.most(60);",
+									"    } else {",
+									"        pm.expect([400, 422]).to.include(pm.response.code);",
+									"    }",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "TC_ROB_04: lock_timeout dưới biên Min-1 (0 phút)",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"displayName\": \"Nguyen Van Binh\",\n  \"bio\": \"Hello, I am using NexusChat !!\",\n  \"lock_timeout\": 0\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/users/me",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "users", "me"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400 Bad Request for lock_timeout = 0\", function () {",
+									"    pm.expect([400, 422]).to.include(pm.response.code);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				},
+				{
+					"name": "TC_ROB_05: lock_timeout vượt biên Max+1 (61 phút)",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"displayName\": \"Nguyen Van Binh\",\n  \"bio\": \"Hello, I am using NexusChat !!\",\n  \"lock_timeout\": 61\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/users/me",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "users", "me"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400 Bad Request for lock_timeout = 61\", function () {",
+									"    pm.expect([400, 422]).to.include(pm.response.code);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					]
+				}
+			]
+		}
+	]
+}
