@@ -16,6 +16,7 @@ import UserAvatar from "./UserAvatar";
 import SelectedUsersList from "../newGroupChat/SelectedUsersList";
 import { toast } from "sonner";
 import { useChatStore } from "@/stores/useChatStore";
+import { useAuthStore } from "@/stores/useAuthStore";
 import { cn } from "@/lib/utils";
 
 import { useEffect } from "react";
@@ -32,6 +33,7 @@ const NewGroupChatModal = ({ open, onOpenChange, preSelectedFriend }: NewGroupCh
   const { friends, getFriends } = useFriendStore();
   const [invitedUsers, setInvitedUsers] = useState<Friend[]>([]);
   const { loading, createConversation } = useChatStore();
+  const { user } = useAuthStore();
 
   useEffect(() => {
     if (open) {
@@ -58,20 +60,21 @@ const NewGroupChatModal = ({ open, onOpenChange, preSelectedFriend }: NewGroupCh
   const handleSubmit = async (e: React.FormEvent) => {
     try {
       e.preventDefault();
-      if (!groupName.trim()) {
-        toast.warning("Vui lòng nhập tên nhóm chat");
-        return;
-      }
       if (invitedUsers.length === 0) {
         toast.warning("Bạn phải chọn ít nhất 1 thành viên vào nhóm");
         return;
       }
 
-      await createConversation(
+      const defaultGroupName = `${user?.displayName || "Bạn"} và ${invitedUsers.length} người khác`;
+      const conversation = await createConversation(
         "group",
-        groupName.trim(),
+        groupName.trim() || defaultGroupName,
         invitedUsers.map((u) => u._id)
       );
+      if (!conversation) {
+        toast.error("Không thể tạo nhóm chat. Vui lòng thử lại.");
+        return;
+      }
 
       setGroupName("");
       setSearch("");
@@ -106,11 +109,10 @@ const NewGroupChatModal = ({ open, onOpenChange, preSelectedFriend }: NewGroupCh
             </Label>
             <Input
               id="groupName"
-              placeholder="Gõ tên nhóm vào đây..."
+              placeholder="Để trống để dùng tên nhóm mặc định..."
               className="h-10 rounded-xl bg-muted/40 border-border/70 text-xs focus:border-purple-500"
               value={groupName}
               onChange={(e) => setGroupName(e.target.value)}
-              required
             />
           </div>
 
@@ -197,7 +199,7 @@ const NewGroupChatModal = ({ open, onOpenChange, preSelectedFriend }: NewGroupCh
           <DialogFooter className="pt-2">
             <Button
               type="submit"
-              disabled={loading || invitedUsers.length === 0 || !groupName.trim()}
+              disabled={loading || invitedUsers.length === 0}
               className="w-full h-10 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-semibold rounded-xl text-xs gap-2 shadow-md shadow-purple-500/20"
             >
               <UserPlus className="w-4 h-4" />

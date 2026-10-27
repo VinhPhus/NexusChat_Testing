@@ -12,14 +12,13 @@ export const createConversation = async (req, res) => {
 
     if (
       !type ||
-      (type === "group" && !name) ||
       !memberIds ||
       !Array.isArray(memberIds) ||
       memberIds.length === 0
     ) {
       return res
         .status(400)
-        .json({ message: "Tên nhóm và danh sách thành viên là bắt buộc" });
+        .json({ message: "Danh sách thành viên là bắt buộc" });
     }
 
     let conversation;
@@ -44,11 +43,15 @@ export const createConversation = async (req, res) => {
     }
 
     if (type === "group") {
+      const groupName = typeof name === "string" && name.trim()
+        ? name.trim()
+        : `${req.user.displayName} và ${memberIds.length} người khác`;
+
       conversation = new Conversation({
         type: "group",
         participants: [{ userId, role: "leader" }, ...memberIds.map((id) => ({ userId: id }))],
         group: {
-          name,
+          name: groupName,
           createdBy: userId,
           voiceRooms: [{ name: "Phòng chung" }], // Phòng mặc định
         },
