@@ -1,0 +1,7 @@
+{
+  "testCase": "TC_UPLOAD_JSON_01",
+  "project": "NexusChat",
+  "module": "FileUpload",
+  "description": "Kiểm thử tải lên tệp định dạng JSON",
+  "status": "ready"
+}

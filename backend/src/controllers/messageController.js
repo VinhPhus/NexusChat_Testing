@@ -530,11 +530,31 @@ export const uploadFile = async (req, res) => {
     // Fix multer encoding for originalname (HTTP headers are latin1 by default)
     file.originalname = Buffer.from(file.originalname, 'latin1').toString('utf8');
 
-    const fileData = await uploadFileToDrive(file);
+    let fileData;
+    try {
+      fileData = await uploadFileToDrive(file);
+    } catch (driveErr) {
+      console.warn("Lỗi Google Drive, tự động fallback sang Cloudinary:", driveErr.message);
+      const result = await cloudinary.uploader.upload(file.path, {
+        folder: "nexuschat_files",
+        resource_type: "raw",
+      });
+      if (fs.existsSync(file.path)) {
+        fs.unlinkSync(file.path);
+      }
+      fileData = {
+        fileUrl: result.secure_url,
+        fileName: file.originalname,
+        fileSize: file.size,
+      };
+    }
 
     return res.status(200).json(fileData);
   } catch (error) {
     console.error("Lỗi khi upload file:", error);
+    if (req.file && fs.existsSync(req.file.path)) {
+      fs.unlinkSync(req.file.path);
+    }
     return res.status(500).json({ message: "Lỗi hệ thống khi tải file lên" });
   }
 };

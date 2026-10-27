@@ -71,10 +71,6 @@ export const uploadFileToDrive = async (file) => {
     };
   } catch (error) {
     console.error("Error uploading file to Google Drive:", error);
-    // Cleanup local file on error
-    if (fs.existsSync(file.path)) {
-      fs.unlinkSync(file.path);
-    }
     throw error;
   }
 };

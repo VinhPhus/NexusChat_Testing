@@ -1,0 +1,4 @@
+Đây là tệp tài liệu kiểm thử tự động cho chức năng Upload File trong hệ thống NexusChat.
+Mã kiểm thử: TC_UPLOAD_DOC_01
+Ngày kiểm thử: 2026-10-27
+Nội dung: Kiểm thử luồng gửi và nhận file đính kèm thành công.
