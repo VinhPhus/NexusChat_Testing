@@ -1,0 +1,419 @@
+{
+  "info": {
+    "_postman_id": "62c88bd3-9478-4d40-8dc1-a404dfcc6eb8",
+    "name": "NexusChat - BVA Quan tri nhom chat (TrungChien)",
+    "description": "Collection chạy 13 test case Standard BVA cho chức năng quản trị nhóm chat theo docs/test-cases/test-case_BVA_TrungChien_NhomChat.md.\n\nCấu hình Collection Variables trước khi chạy:\n- baseUrl: URL backend, mặc định http://localhost:5001.\n- bearerToken: access token của tài khoản tạo nhóm (tài khoản này là trưởng nhóm).\n- memberIds: mảng JSON gồm tối đa 99 ObjectId người dùng hợp lệ, duy nhất và đã kết bạn với tài khoản trưởng nhóm. Collection dùng N ID đầu tiên theo số thành viên của từng case; số thành viên bao gồm trưởng nhóm.\n\nMỗi case tạo một nhóm mới. Để gán deputy_count, collection gọi PATCH /api/conversations/:id/role cho các thành viên đầu tiên trong memberIds. Các nhóm được giữ lại trong cơ sở dữ liệu sau khi chạy; hãy xóa thủ công nếu không cần.\n\nVí dụ memberIds: [\"64a000000000000000000001\", \"64a000000000000000000002\"] (hãy thay bằng ID thật).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5001",
+      "type": "string"
+    },
+    {
+      "key": "bearerToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "memberIds",
+      "value": "[]",
+      "type": "string"
+    },
+    {
+      "key": "groupName",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "memberIdsForCase",
+      "value": "[]",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "BVA - Quan tri nhom chat",
+      "description": "Chạy tuần tự các request trong Collection Runner. Các case BVA chỉ thay đổi một biến mỗi lần; các biến còn lại giữ Nom.",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const caseNo = Number(pm.variables.get('caseNo'));",
+              "const groupNameLength = Number(pm.variables.get('groupNameLength'));",
+              "const memberCount = Number(pm.variables.get('memberCount'));",
+              "const deputyCount = Number(pm.variables.get('deputyCount'));",
+              "const token = pm.variables.get('bearerToken');",
+              "let allMemberIds;",
+              "",
+              "try {",
+              "  allMemberIds = JSON.parse(pm.variables.get('memberIds') || '[]');",
+              "} catch (error) {",
+              "  throw new Error('Collection variable memberIds phải là mảng JSON hợp lệ.');",
+              "}",
+              "",
+              "if (!token) throw new Error('Hãy cấu hình Collection variable bearerToken trước khi chạy.');",
+              "if (!Array.isArray(allMemberIds)) throw new Error('memberIds phải là một mảng JSON.');",
+              "if (allMemberIds.length < memberCount - 1) {",
+              "  throw new Error(`Case ${caseNo} cần ${memberCount - 1} ID thành viên ngoài trưởng nhóm, nhưng memberIds chỉ có ${allMemberIds.length}.`);",
+              "}",
+              "",
+              "const selectedIds = allMemberIds.slice(0, memberCount - 1);",
+              "if (new Set(selectedIds).size !== selectedIds.length) throw new Error('memberIds không được chứa ID trùng lặp.');",
+              "if (selectedIds.some((id) => typeof id !== 'string' || !/^[a-f\\d]{24}$/i.test(id))) {",
+              "  throw new Error('Mỗi giá trị trong memberIds được sử dụng phải là MongoDB ObjectId gồm 24 ký tự hex.');",
+              "}",
+              "if (deputyCount > selectedIds.length) throw new Error(`Case ${caseNo} cần ${deputyCount} thành viên để gán phó nhóm.`);",
+              "",
+              "const groupName = `G${String(caseNo).padStart(2, '0')}${'x'.repeat(groupNameLength - 3)}`;",
+              "pm.variables.set('groupName', groupName);",
+              "pm.variables.set('memberIdsForCase', JSON.stringify(selectedIds));",
+              "console.log(`Case ${caseNo}: name length=${groupName.length}, total members=${memberCount}, deputies=${deputyCount}`);"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const caseNo = Number(pm.variables.get('caseNo'));",
+              "const memberCount = Number(pm.variables.get('memberCount'));",
+              "const deputyCount = Number(pm.variables.get('deputyCount'));",
+              "const selectedIds = JSON.parse(pm.variables.get('memberIdsForCase') || '[]');",
+              "const baseUrl = pm.variables.get('baseUrl');",
+              "const token = pm.variables.get('bearerToken');",
+              "",
+              "pm.test(`Case ${caseNo}: tạo nhóm trả HTTP 201`, () => pm.response.to.have.status(201));",
+              "if (pm.response.code !== 201) return;",
+              "",
+              "const payload = pm.response.json();",
+              "const conversation = payload.conversation;",
+              "pm.test(`Case ${caseNo}: có dữ liệu nhóm trả về`, () => pm.expect(conversation).to.be.an('object')) ;",
+              "if (!conversation || !conversation._id) return;",
+              "",
+              "pm.test(`Case ${caseNo}: tên nhóm đúng độ dài`, () => pm.expect(conversation.group.name).to.have.length(Number(pm.variables.get('groupNameLength'))));",
+              "pm.test(`Case ${caseNo}: số thành viên đúng`, () => pm.expect(conversation.participants).to.have.length(memberCount));",
+              "pm.collectionVariables.set('lastCreatedGroupId', conversation._id);",
+              "",
+              "const expectedDeputyIds = selectedIds.slice(0, deputyCount);",
+              "if (expectedDeputyIds.length === 0) {",
+              "  pm.test(`Case ${caseNo}: số phó nhóm bằng ${deputyCount}`, () => pm.expect(conversation.participants.filter((participant) => participant.role === 'deputy')).to.have.length(deputyCount));",
+              "  return;",
+              "}",
+              "",
+              "let nextIndex = 0;",
+              "let lastParticipants = conversation.participants;",
+              "const assignNextDeputy = () => {",
+              "  if (nextIndex >= expectedDeputyIds.length) {",
+              "    pm.test(`Case ${caseNo}: số phó nhóm bằng ${deputyCount}`, () => pm.expect(lastParticipants.filter((participant) => participant.role === 'deputy')).to.have.length(deputyCount));",
+              "    return;",
+              "  }",
+              "",
+              "  const memberId = expectedDeputyIds[nextIndex++];",
+              "  pm.sendRequest({",
+              "    url: `${baseUrl}/api/conversations/${conversation._id}/role`,",
+              "    method: 'PATCH',",
+              "    header: {",
+              "      'Content-Type': 'application/json',",
+              "      Authorization: `Bearer ${token}`",
+              "    },",
+              "    body: { mode: 'raw', raw: JSON.stringify({ memberId, role: 'deputy' }) }",
+              "  }, (error, response) => {",
+              "    pm.test(`Case ${caseNo}: gán phó nhóm ${nextIndex} thành công`, () => {",
+              "      pm.expect(error, error ? error.message : 'Không có lỗi kết nối').to.equal(null);",
+              "      pm.expect(response.code).to.equal(200);",
+              "    });",
+              "    if (error || response.code !== 200) return;",
+              "",
+              "    const rolePayload = response.json();",
+              "    lastParticipants = rolePayload.participants || [];",
+              "    const promotedMember = lastParticipants.find((participant) => String(participant._id) === memberId);",
+              "    pm.test(`Case ${caseNo}: thành viên được gán có role deputy`, () => pm.expect(promotedMember && promotedMember.role).to.equal('deputy'));",
+              "    assignNextDeputy();",
+              "  });",
+              "};",
+              "",
+              "assignNextDeputy();"
+            ]
+          }
+        }
+      ],
+      "item": [
+        {
+          "name": "TC 01 - group_name_len Min (3), member_count Nom (30), deputy_count Nom (2)",
+          "event": [],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{bearerToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"group\",\n  \"name\": \"{{groupName}}\",\n  \"memberIds\": {{memberIdsForCase}}\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/conversations",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "conversations"
+              ]
+            }
+          },
+          "response": [],
+          "variable": [
+            { "key": "caseNo", "value": "1" },
+            { "key": "groupNameLength", "value": "3" },
+            { "key": "memberCount", "value": "30" },
+            { "key": "deputyCount", "value": "2" }
+          ]
+        },
+        {
+          "name": "TC 02 - group_name_len Min+ (4), member_count Nom (30), deputy_count Nom (2)",
+          "event": [],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{ "key": "token", "value": "{{bearerToken}}", "type": "string" }]
+            },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"group\",\n  \"name\": \"{{groupName}}\",\n  \"memberIds\": {{memberIdsForCase}}\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/conversations",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "conversations"]
+            }
+          },
+          "response": [],
+          "variable": [
+            { "key": "caseNo", "value": "2" },
+            { "key": "groupNameLength", "value": "4" },
+            { "key": "memberCount", "value": "30" },
+            { "key": "deputyCount", "value": "2" }
+          ]
+        },
+        {
+          "name": "TC 03 - group_name_len Nom (20), member_count Nom (30), deputy_count Nom (2)",
+          "event": [],
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{bearerToken}}", "type": "string" }] },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"type\": \"group\",\n  \"name\": \"{{groupName}}\",\n  \"memberIds\": {{memberIdsForCase}}\n}" },
+            "url": { "raw": "{{baseUrl}}/api/conversations", "host": ["{{baseUrl}}"], "path": ["api", "conversations"] }
+          },
+          "response": [],
+          "variable": [
+            { "key": "caseNo", "value": "3" },
+            { "key": "groupNameLength", "value": "20" },
+            { "key": "memberCount", "value": "30" },
+            { "key": "deputyCount", "value": "2" }
+          ]
+        },
+        {
+          "name": "TC 04 - group_name_len Max- (49), member_count Nom (30), deputy_count Nom (2)",
+          "event": [],
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{bearerToken}}", "type": "string" }] },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"type\": \"group\",\n  \"name\": \"{{groupName}}\",\n  \"memberIds\": {{memberIdsForCase}}\n}" },
+            "url": { "raw": "{{baseUrl}}/api/conversations", "host": ["{{baseUrl}}"], "path": ["api", "conversations"] }
+          },
+          "response": [],
+          "variable": [
+            { "key": "caseNo", "value": "4" },
+            { "key": "groupNameLength", "value": "49" },
+            { "key": "memberCount", "value": "30" },
+            { "key": "deputyCount", "value": "2" }
+          ]
+        },
+        {
+          "name": "TC 05 - group_name_len Max (50), member_count Nom (30), deputy_count Nom (2)",
+          "event": [],
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{bearerToken}}", "type": "string" }] },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"type\": \"group\",\n  \"name\": \"{{groupName}}\",\n  \"memberIds\": {{memberIdsForCase}}\n}" },
+            "url": { "raw": "{{baseUrl}}/api/conversations", "host": ["{{baseUrl}}"], "path": ["api", "conversations"] }
+          },
+          "response": [],
+          "variable": [
+            { "key": "caseNo", "value": "5" },
+            { "key": "groupNameLength", "value": "50" },
+            { "key": "memberCount", "value": "30" },
+            { "key": "deputyCount", "value": "2" }
+          ]
+        },
+        {
+          "name": "TC 06 - group_name_len Nom (20), member_count Min (3), deputy_count Nom (2)",
+          "event": [],
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{bearerToken}}", "type": "string" }] },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"type\": \"group\",\n  \"name\": \"{{groupName}}\",\n  \"memberIds\": {{memberIdsForCase}}\n}" },
+            "url": { "raw": "{{baseUrl}}/api/conversations", "host": ["{{baseUrl}}"], "path": ["api", "conversations"] }
+          },
+          "response": [],
+          "variable": [
+            { "key": "caseNo", "value": "6" },
+            { "key": "groupNameLength", "value": "20" },
+            { "key": "memberCount", "value": "3" },
+            { "key": "deputyCount", "value": "2" }
+          ]
+        },
+        {
+          "name": "TC 07 - group_name_len Nom (20), member_count Min+ (4), deputy_count Nom (2)",
+          "event": [],
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{bearerToken}}", "type": "string" }] },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"type\": \"group\",\n  \"name\": \"{{groupName}}\",\n  \"memberIds\": {{memberIdsForCase}}\n}" },
+            "url": { "raw": "{{baseUrl}}/api/conversations", "host": ["{{baseUrl}}"], "path": ["api", "conversations"] }
+          },
+          "response": [],
+          "variable": [
+            { "key": "caseNo", "value": "7" },
+            { "key": "groupNameLength", "value": "20" },
+            { "key": "memberCount", "value": "4" },
+            { "key": "deputyCount", "value": "2" }
+          ]
+        },
+        {
+          "name": "TC 08 - group_name_len Nom (20), member_count Max- (99), deputy_count Nom (2)",
+          "event": [],
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{bearerToken}}", "type": "string" }] },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"type\": \"group\",\n  \"name\": \"{{groupName}}\",\n  \"memberIds\": {{memberIdsForCase}}\n}" },
+            "url": { "raw": "{{baseUrl}}/api/conversations", "host": ["{{baseUrl}}"], "path": ["api", "conversations"] }
+          },
+          "response": [],
+          "variable": [
+            { "key": "caseNo", "value": "8" },
+            { "key": "groupNameLength", "value": "20" },
+            { "key": "memberCount", "value": "99" },
+            { "key": "deputyCount", "value": "2" }
+          ]
+        },
+        {
+          "name": "TC 09 - group_name_len Nom (20), member_count Max (100), deputy_count Nom (2)",
+          "event": [],
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{bearerToken}}", "type": "string" }] },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"type\": \"group\",\n  \"name\": \"{{groupName}}\",\n  \"memberIds\": {{memberIdsForCase}}\n}" },
+            "url": { "raw": "{{baseUrl}}/api/conversations", "host": ["{{baseUrl}}"], "path": ["api", "conversations"] }
+          },
+          "response": [],
+          "variable": [
+            { "key": "caseNo", "value": "9" },
+            { "key": "groupNameLength", "value": "20" },
+            { "key": "memberCount", "value": "100" },
+            { "key": "deputyCount", "value": "2" }
+          ]
+        },
+        {
+          "name": "TC 10 - group_name_len Nom (20), member_count Nom (30), deputy_count Min (0)",
+          "event": [],
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{bearerToken}}", "type": "string" }] },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"type\": \"group\",\n  \"name\": \"{{groupName}}\",\n  \"memberIds\": {{memberIdsForCase}}\n}" },
+            "url": { "raw": "{{baseUrl}}/api/conversations", "host": ["{{baseUrl}}"], "path": ["api", "conversations"] }
+          },
+          "response": [],
+          "variable": [
+            { "key": "caseNo", "value": "10" },
+            { "key": "groupNameLength", "value": "20" },
+            { "key": "memberCount", "value": "30" },
+            { "key": "deputyCount", "value": "0" }
+          ]
+        },
+        {
+          "name": "TC 11 - group_name_len Nom (20), member_count Nom (30), deputy_count Min+ (1)",
+          "event": [],
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{bearerToken}}", "type": "string" }] },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"type\": \"group\",\n  \"name\": \"{{groupName}}\",\n  \"memberIds\": {{memberIdsForCase}}\n}" },
+            "url": { "raw": "{{baseUrl}}/api/conversations", "host": ["{{baseUrl}}"], "path": ["api", "conversations"] }
+          },
+          "response": [],
+          "variable": [
+            { "key": "caseNo", "value": "11" },
+            { "key": "groupNameLength", "value": "20" },
+            { "key": "memberCount", "value": "30" },
+            { "key": "deputyCount", "value": "1" }
+          ]
+        },
+        {
+          "name": "TC 12 - group_name_len Nom (20), member_count Nom (30), deputy_count Max- (2; duplicates TC 03 inputs)",
+          "event": [],
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{bearerToken}}", "type": "string" }] },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"type\": \"group\",\n  \"name\": \"{{groupName}}\",\n  \"memberIds\": {{memberIdsForCase}}\n}" },
+            "url": { "raw": "{{baseUrl}}/api/conversations", "host": ["{{baseUrl}}"], "path": ["api", "conversations"] }
+          },
+          "response": [],
+          "variable": [
+            { "key": "caseNo", "value": "12" },
+            { "key": "groupNameLength", "value": "20" },
+            { "key": "memberCount", "value": "30" },
+            { "key": "deputyCount", "value": "2" }
+          ]
+        },
+        {
+          "name": "TC 13 - group_name_len Nom (20), member_count Nom (30), deputy_count Max (3)",
+          "event": [],
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{bearerToken}}", "type": "string" }] },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"type\": \"group\",\n  \"name\": \"{{groupName}}\",\n  \"memberIds\": {{memberIdsForCase}}\n}" },
+            "url": { "raw": "{{baseUrl}}/api/conversations", "host": ["{{baseUrl}}"], "path": ["api", "conversations"] }
+          },
+          "response": [],
+          "variable": [
+            { "key": "caseNo", "value": "13" },
+            { "key": "groupNameLength", "value": "20" },
+            { "key": "memberCount", "value": "30" },
+            { "key": "deputyCount", "value": "3" }
+          ]
+        }
+      ]
+    }
+  ]
+}
