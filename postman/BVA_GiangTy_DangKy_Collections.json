@@ -1,0 +1,102 @@
+{
+  "info": {
+    "name": "NexusChat - BVA Đăng ký tài khoản",
+    "description": "Standard BVA 4n+1 cho username [3,20] và password [6,32]. Chạy request với 9 iterations trong Collection Runner.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5001"
+    }
+  ],
+  "item": [
+    {
+      "name": "BVA - Signup username/password boundaries",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"username\": \"{{bvaUsername}}\",\n  \"password\": \"{{bvaPassword}}\",\n  \"email\": \"{{bvaEmail}}\",\n  \"firstName\": \"BVA\",\n  \"lastName\": \"Test\",\n  \"otp\": \"{{bvaInvalidOtp}}\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/auth/signup",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "auth",
+            "signup"
+          ]
+        },
+        "description": "Chạy 9 iterations. Pre-request script chọn dữ liệu theo thứ tự BVA-01 đến BVA-09. OTP sai được dùng để không tạo tài khoản."
+      },
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const cases = [",
+              "  { id: 'BVA-01', username: 'bvauser001', password: 'Aa1234567890' },",
+              "  { id: 'BVA-02', username: 'bva', password: 'Aa1234567890' },",
+              "  { id: 'BVA-03', username: 'bvaa', password: 'Aa1234567890' },",
+              "  { id: 'BVA-04', username: 'bva' + 'u'.repeat(16), password: 'Aa1234567890' },",
+              "  { id: 'BVA-05', username: 'bva' + 'u'.repeat(17), password: 'Aa1234567890' },",
+              "  { id: 'BVA-06', username: 'bvauser001', password: 'Aa1234' },",
+              "  { id: 'BVA-07', username: 'bvauser001', password: 'Aa12345' },",
+              "  { id: 'BVA-08', username: 'bvauser001', password: 'Aa' + '1'.repeat(29) },",
+              "  { id: 'BVA-09', username: 'bvauser001', password: 'Aa' + '1'.repeat(30) }",
+              "];",
+              "const testCase = cases[pm.info.iteration];",
+              "if (!testCase) {",
+              "  throw new Error('Iteration không hợp lệ. Hãy chạy đúng 9 iterations (0-8).');",
+              "}",
+              "pm.variables.set('bvaCaseId', testCase.id);",
+              "pm.variables.set('bvaUsername', testCase.username);",
+              "pm.variables.set('bvaPassword', testCase.password);",
+              "pm.variables.set('bvaEmail', 'bva-' + Date.now() + '-' + pm.info.iteration + '@example.com');",
+              "pm.variables.set('bvaInvalidOtp', 'INVALID-BVA-' + Date.now() + '-' + pm.info.iteration);"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const caseId = pm.variables.get('bvaCaseId');",
+              "const username = pm.variables.get('bvaUsername');",
+              "const password = pm.variables.get('bvaPassword');",
+              "const responseBody = pm.response.json();",
+              "const expectedOtpMessage = 'Mã OTP không chính xác hoặc đã hết hạn';",
+              "",
+              "pm.test(caseId + ' - dữ liệu đúng độ dài biên', function () {",
+              "  const expectedLengths = {",
+              "    'BVA-01': [10, 12], 'BVA-02': [3, 12], 'BVA-03': [4, 12],",
+              "    'BVA-04': [19, 12], 'BVA-05': [20, 12], 'BVA-06': [10, 6],",
+              "    'BVA-07': [10, 7], 'BVA-08': [10, 31], 'BVA-09': [10, 32]",
+              "  }[caseId];",
+              "  pm.expect(expectedLengths, 'Mã test case được chọn').to.exist;",
+              "  pm.expect(username.length, 'Độ dài username').to.eql(expectedLengths[0]);",
+              "  pm.expect(password.length, 'Độ dài password').to.eql(expectedLengths[1]);",
+              "});",
+              "",
+              "pm.test(caseId + ' - dữ liệu được chấp nhận đến bước xác thực OTP', function () {",
+              "  pm.expect(pm.response.code).to.eql(400);",
+              "  pm.expect(responseBody.message).to.eql(expectedOtpMessage);",
+              "});"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
