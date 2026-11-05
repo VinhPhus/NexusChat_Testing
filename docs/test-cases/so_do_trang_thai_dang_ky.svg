@@ -1,0 +1,117 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 520" width="100%" height="100%" style="background-color: #ffffff; font-family: 'Segoe UI', Arial, sans-serif;">
+  <defs>
+    <!-- Shadow Filter -->
+    <filter id="boxShadow" x="-10%" y="-10%" width="125%" height="125%">
+      <feDropShadow dx="2" dy="4" stdDeviation="3" flood-opacity="0.15" />
+    </filter>
+    
+    <!-- Arrow Markers -->
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#374151" />
+    </marker>
+    <marker id="arrow-green" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#16a34a" />
+    </marker>
+    <marker id="arrow-red" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#dc2626" />
+    </marker>
+  </defs>
+
+  <!-- Title & Subtitle -->
+  <text x="480" y="40" text-anchor="middle" font-size="22" font-weight="bold" fill="#111827">SƠ ĐỒ CHUYỂN TRẠNG THÁI - CHỨC NĂNG ĐĂNG KÝ (SIGN UP)</text>
+  <text x="480" y="65" text-anchor="middle" font-size="14" fill="#6b7280">(Thiết kế dựa trên mô hình kiểm thử chuyển trạng thái - Slide 40 Chương 4)</text>
+
+  <!-- ================= TOP ROW: STATES ================= -->
+
+  <!-- Node: Start -->
+  <g transform="translate(40, 120)">
+    <rect width="140" height="70" rx="8" fill="#10b981" stroke="#047857" stroke-width="2.5" filter="url(#boxShadow)"/>
+    <text x="70" y="36" text-anchor="middle" font-size="16" font-weight="bold" fill="#ffffff">Start</text>
+    <text x="70" y="54" text-anchor="middle" font-size="12" fill="#ecfdf5">(Nhập thông tin)</text>
+  </g>
+
+  <!-- Path: Start -> 1st Try -->
+  <line x1="180" y1="155" x2="270" y2="155" stroke="#374151" stroke-width="2.5" marker-end="url(#arrow)" />
+  <rect x="188" y="125" width="75" height="22" rx="4" fill="#f3f4f6" stroke="#9ca3af" stroke-width="1"/>
+  <text x="225" y="140" text-anchor="middle" font-size="10.5" font-weight="600" fill="#374151">Hợp lệ (Gửi OTP)</text>
+
+  <!-- Node: 1st Try -->
+  <g transform="translate(270, 120)">
+    <rect width="150" height="70" rx="8" fill="#fbbf24" stroke="#d97706" stroke-width="2.5" filter="url(#boxShadow)"/>
+    <text x="75" y="36" text-anchor="middle" font-size="16" font-weight="bold" fill="#78350f">1st Try</text>
+    <text x="75" y="54" text-anchor="middle" font-size="12" font-weight="500" fill="#92400e">(Nhập OTP lần 1)</text>
+  </g>
+
+  <!-- Path: 1st Try -> 2nd Try -->
+  <line x1="420" y1="155" x2="510" y2="155" stroke="#dc2626" stroke-width="2.5" marker-end="url(#arrow-red)" />
+  <!-- Red Badge for Incorrect OTP -->
+  <rect x="428" y="118" width="74" height="24" rx="4" fill="#dc2626" filter="url(#boxShadow)"/>
+  <text x="465" y="134" text-anchor="middle" font-size="11" font-weight="bold" fill="#ffffff">Incorrect OTP</text>
+  <text x="465" y="170" text-anchor="middle" font-size="10" fill="#b91c1c">(Sai OTP lần 1)</text>
+
+  <!-- Node: 2nd Try -->
+  <g transform="translate(510, 120)">
+    <rect width="150" height="70" rx="8" fill="#38bdf8" stroke="#0284c7" stroke-width="2.5" filter="url(#boxShadow)"/>
+    <text x="75" y="36" text-anchor="middle" font-size="16" font-weight="bold" fill="#0c4a6e">2nd Try</text>
+    <text x="75" y="54" text-anchor="middle" font-size="12" font-weight="500" fill="#075985">(Nhập OTP lần 2)</text>
+  </g>
+
+  <!-- Path: 2nd Try -> 3rd Try -->
+  <line x1="660" y1="155" x2="750" y2="155" stroke="#dc2626" stroke-width="2.5" marker-end="url(#arrow-red)" />
+  <!-- Red Badge for Incorrect OTP -->
+  <rect x="668" y="118" width="74" height="24" rx="4" fill="#dc2626" filter="url(#boxShadow)"/>
+  <text x="705" y="134" text-anchor="middle" font-size="11" font-weight="bold" fill="#ffffff">Incorrect OTP</text>
+  <text x="705" y="170" text-anchor="middle" font-size="10" fill="#b91c1c">(Sai OTP lần 2)</text>
+
+  <!-- Node: 3rd Try -->
+  <g transform="translate(750, 120)">
+    <rect width="160" height="70" rx="8" fill="#a3e635" stroke="#65a30d" stroke-width="2.5" filter="url(#boxShadow)"/>
+    <text x="80" y="36" text-anchor="middle" font-size="16" font-weight="bold" fill="#365314">3rd Try</text>
+    <text x="80" y="54" text-anchor="middle" font-size="12" font-weight="500" fill="#3f6212">(Nhập OTP lần cuối)</text>
+  </g>
+
+  <!-- ================= BOTTOM ROW: TERMINAL STATES ================= -->
+
+  <!-- Node: Access Granted / Đăng ký thành công -->
+  <g transform="translate(300, 390)">
+    <rect width="240" height="75" rx="8" fill="#16a34a" stroke="#15803d" stroke-width="2.5" filter="url(#boxShadow)"/>
+    <text x="120" y="35" text-anchor="middle" font-size="16" font-weight="bold" fill="#ffffff">Access Granted</text>
+    <text x="120" y="58" text-anchor="middle" font-size="13" font-weight="500" fill="#dcfce7">(Đăng Ký Thành Công)</text>
+  </g>
+
+  <!-- Node: Account Blocked / Khóa phiên đăng ký -->
+  <g transform="translate(680, 390)">
+    <rect width="240" height="75" rx="8" fill="#dc2626" stroke="#b91c1c" stroke-width="2.5" filter="url(#boxShadow)"/>
+    <text x="120" y="35" text-anchor="middle" font-size="16" font-weight="bold" fill="#ffffff">Registration Blocked</text>
+    <text x="120" y="58" text-anchor="middle" font-size="13" font-weight="500" fill="#fee2e2">(Hủy phiên / Khóa Đăng Ký)</text>
+  </g>
+
+  <!-- ================= TRANSITIONS TO TERMINAL STATES ================= -->
+
+  <!-- 1st Try -> Access Granted -->
+  <path d="M 330 190 L 330 250 L 390 390" stroke="#16a34a" stroke-width="2.5" fill="none" marker-end="url(#arrow-green)" />
+  <rect x="290" y="270" width="76" height="24" rx="4" fill="#16a34a" filter="url(#boxShadow)"/>
+  <text x="328" y="286" text-anchor="middle" font-size="11" font-weight="bold" fill="#ffffff">Correct OTP</text>
+
+  <!-- 2nd Try -> Access Granted -->
+  <path d="M 585 190 L 585 270 L 460 390" stroke="#16a34a" stroke-width="2.5" fill="none" marker-end="url(#arrow-green)" />
+  <rect x="525" y="270" width="76" height="24" rx="4" fill="#16a34a" filter="url(#boxShadow)"/>
+  <text x="563" y="286" text-anchor="middle" font-size="11" font-weight="bold" fill="#ffffff">Correct OTP</text>
+
+  <!-- 3rd Try -> Access Granted -->
+  <path d="M 780 190 L 780 320 L 515 390" stroke="#16a34a" stroke-width="2.5" fill="none" marker-end="url(#arrow-green)" />
+  <rect x="660" y="320" width="76" height="24" rx="4" fill="#16a34a" filter="url(#boxShadow)"/>
+  <text x="698" y="336" text-anchor="middle" font-size="11" font-weight="bold" fill="#ffffff">Correct OTP</text>
+
+  <!-- 3rd Try -> Registration Blocked -->
+  <path d="M 870 190 L 870 390" stroke="#dc2626" stroke-width="2.5" fill="none" marker-end="url(#arrow-red)" />
+  <rect x="832" y="270" width="76" height="24" rx="4" fill="#dc2626" filter="url(#boxShadow)"/>
+  <text x="870" y="286" text-anchor="middle" font-size="11" font-weight="bold" fill="#ffffff">Incorrect OTP</text>
+  <text x="870" y="306" text-anchor="middle" font-size="10" fill="#b91c1c">(Lần thứ 3)</text>
+
+  <!-- Self loop at Start for Invalid Input -->
+  <path d="M 70 120 C 70 80, 150 80, 150 120" stroke="#6b7280" stroke-width="1.8" stroke-dasharray="4,4" fill="none" marker-end="url(#arrow)" />
+  <text x="110" y="75" text-anchor="middle" font-size="10" fill="#4b5563">Form không hợp lệ (Báo lỗi)</text>
+
+</svg>
+
