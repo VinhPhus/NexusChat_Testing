@@ -48,6 +48,8 @@ dist-ssr
 .idea
 .DS_Store
 *.suo
+coverage/
+*.lcov
 *.ntvs*
 *.njsproj
 *.sln
