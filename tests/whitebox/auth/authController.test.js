@@ -6,12 +6,14 @@ import { jest } from "@jest/globals";
 const mockUserFindOne = jest.fn();
 const mockUserCreate = jest.fn();
 const mockUserFindById = jest.fn();
+const mockUserFindByIdAndUpdate = jest.fn();
 
 jest.unstable_mockModule("../../../backend/src/models/User.js", () => ({
   default: {
     findOne: mockUserFindOne,
     create: mockUserCreate,
     findById: mockUserFindById,
+    findByIdAndUpdate: mockUserFindByIdAndUpdate,
   },
 }));
 
@@ -74,6 +76,8 @@ const {
   refreshToken,
   checkUsername,
   checkEmail,
+  resetPassword,
+  signOut,
 } = await import("../../../backend/src/controllers/authController.js");
 
 // ─── Helper tạo mock req/res ─────────────────────────────────────────────────
@@ -156,6 +160,27 @@ describe("validateUsername (via checkUsername)", () => {
       expect.objectContaining({ available: true })
     );
   });
+
+  it("TC-VU-07: username đã tồn tại trong DB → 200 available:false", async () => {
+    mockUserFindOne.mockResolvedValue({ _id: "u1", username: "existing_user" });
+    const req = { body: { username: "existing_user" } };
+    const res = makeRes();
+    await checkUsername(req, res);
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith({
+      available: false,
+      message: "Tên đăng nhập này đã được sử dụng",
+    });
+  });
+
+  it("TC-VU-08: DB ném lỗi khi checkUsername → 500", async () => {
+    mockUserFindOne.mockRejectedValue(new Error("DB Error"));
+    const req = { body: { username: "valid_user" } };
+    const res = makeRes();
+    await checkUsername(req, res);
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.json).toHaveBeenCalledWith({ message: "Lỗi hệ thống" });
+  });
 });
 
 // ════════════════════════════════════════════════════════════════════════════
@@ -194,6 +219,27 @@ describe("validateEmail (via checkEmail)", () => {
     expect(res.json).toHaveBeenCalledWith(
       expect.objectContaining({ available: true })
     );
+  });
+
+  it("TC-VE-04: email đã tồn tại trong DB → 200 available:false", async () => {
+    mockUserFindOne.mockResolvedValue({ _id: "u1", email: "used@example.com" });
+    const req = { body: { email: "used@example.com" } };
+    const res = makeRes();
+    await checkEmail(req, res);
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith({
+      available: false,
+      message: "Email này đã được sử dụng",
+    });
+  });
+
+  it("TC-VE-05: DB ném lỗi khi checkEmail → 500", async () => {
+    mockUserFindOne.mockRejectedValue(new Error("DB Error"));
+    const req = { body: { email: "user@example.com" } };
+    const res = makeRes();
+    await checkEmail(req, res);
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.json).toHaveBeenCalledWith({ message: "Lỗi hệ thống" });
   });
 });
 
@@ -549,10 +595,21 @@ describe("sendOtp", () => {
       expect.objectContaining({ message: "Mã OTP đã được gửi đến email của bạn!" })
     );
   });
+
+  it("TC-OTP-07: DB ném lỗi khi sendOtp → 500", async () => {
+    mockUserFindOne.mockRejectedValue(new Error("DB Error"));
+    const req = { body: { email: "user@test.com", type: "register" } };
+    const res = makeRes();
+    await sendOtp(req, res);
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.json).toHaveBeenCalledWith(
+      expect.objectContaining({ message: expect.stringMatching(/DB Error|Lỗi/) })
+    );
+  });
 });
 
 // ════════════════════════════════════════════════════════════════════════════
-// NHÓM 7 — verifyOtp — 3 luồng
+// NHÓM 7 — verifyOtp — 4 luồng
 // ════════════════════════════════════════════════════════════════════════════
 describe("verifyOtp", () => {
   beforeEach(() => jest.clearAllMocks());
@@ -588,10 +645,165 @@ describe("verifyOtp", () => {
       expect.objectContaining({ message: "Xác thực mã OTP thành công!" })
     );
   });
+
+  it("TC-VO-04: DB ném lỗi khi verifyOtp → 500", async () => {
+    mockOtpFindOne.mockRejectedValue(new Error("DB Error"));
+    const req = { body: { email: "a@b.com", otp: "123456", type: "register" } };
+    const res = makeRes();
+    await verifyOtp(req, res);
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.json).toHaveBeenCalledWith({ message: "Lỗi hệ thống khi xác thực OTP" });
+  });
 });
 
 // ════════════════════════════════════════════════════════════════════════════
-// NHÓM 8 — refreshToken — 4 luồng
+// NHÓM 8 — resetPassword — 6 luồng
+// ════════════════════════════════════════════════════════════════════════════
+describe("resetPassword", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockOtpFindOne.mockReset();
+    mockUserFindOne.mockReset();
+    mockBcryptHash.mockReset();
+    mockOtpDeleteMany.mockReset();
+    mockSessionDeleteMany.mockReset();
+  });
+
+  const validResetBody = {
+    email: "user@example.com",
+    otp: "123456",
+    newPassword: "NewValidPassword123",
+  };
+
+  it("TC-RP-01: Thiếu trường bắt buộc → 400", async () => {
+    const req = { body: { email: "user@example.com", otp: "123456" } }; // thiếu newPassword
+    const res = makeRes();
+    await resetPassword(req, res);
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.json).toHaveBeenCalledWith({ message: "Thiếu email, otp hoặc mật khẩu mới" });
+  });
+
+  it("TC-RP-02: newPassword không thỏa mãn chính sách mật khẩu → 400", async () => {
+    const req = { body: { ...validResetBody, newPassword: "123" } };
+    const res = makeRes();
+    await resetPassword(req, res);
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.json).toHaveBeenCalledWith({ message: "Mật khẩu phải có ít nhất 6 ký tự" });
+  });
+
+  it("TC-RP-03: OTP không chính xác hoặc đã hết hạn → 400", async () => {
+    mockOtpFindOne.mockResolvedValue(null);
+    const req = { body: { ...validResetBody } };
+    const res = makeRes();
+    await resetPassword(req, res);
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.json).toHaveBeenCalledWith({ message: "Mã OTP không chính xác hoặc đã hết hạn" });
+  });
+
+  it("TC-RP-04: Không tìm thấy người dùng với email → 404", async () => {
+    mockOtpFindOne.mockResolvedValue({ _id: "otp1" });
+    mockUserFindOne.mockResolvedValue(null);
+    const req = { body: { ...validResetBody } };
+    const res = makeRes();
+    await resetPassword(req, res);
+    expect(res.status).toHaveBeenCalledWith(404);
+    expect(res.json).toHaveBeenCalledWith({ message: "Không tìm thấy người dùng với email này" });
+  });
+
+  it("TC-RP-05: Đặt lại mật khẩu thành công → 200", async () => {
+    const mockUser = {
+      _id: "u123",
+      hashedPassword: "old_hashed_password",
+      save: jest.fn().mockResolvedValue(true),
+    };
+    mockOtpFindOne.mockResolvedValue({ _id: "otp1" });
+    mockUserFindOne.mockResolvedValue(mockUser);
+    mockBcryptHash.mockResolvedValue("new_hashed_password");
+    mockOtpDeleteMany.mockResolvedValue({});
+    mockSessionDeleteMany.mockResolvedValue({});
+
+    const req = { body: { ...validResetBody } };
+    const res = makeRes();
+    await resetPassword(req, res);
+
+    expect(mockBcryptHash).toHaveBeenCalledWith("NewValidPassword123", 10);
+    expect(mockUser.hashedPassword).toBe("new_hashed_password");
+    expect(mockUser.save).toHaveBeenCalled();
+    expect(mockOtpDeleteMany).toHaveBeenCalledWith({ email: "user@example.com", type: "reset_password" });
+    expect(mockSessionDeleteMany).toHaveBeenCalledWith({ userId: "u123" });
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith({
+      message: "Đặt lại mật khẩu thành công! Bạn có thể đăng nhập ngay.",
+    });
+  });
+
+  it("TC-RP-06: DB ném lỗi khi resetPassword → 500", async () => {
+    mockOtpFindOne.mockRejectedValue(new Error("DB Error"));
+    const req = { body: { ...validResetBody } };
+    const res = makeRes();
+    await resetPassword(req, res);
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.json).toHaveBeenCalledWith({ message: "Lỗi hệ thống khi đặt lại mật khẩu" });
+  });
+});
+
+// ════════════════════════════════════════════════════════════════════════════
+// NHÓM 9 — signOut — 4 luồng
+// ════════════════════════════════════════════════════════════════════════════
+describe("signOut", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockSessionFindOne.mockReset();
+    mockSessionDeleteOne.mockReset();
+    mockUserFindByIdAndUpdate.mockReset();
+  });
+
+  it("TC-SO-01: Không có token refreshToken trong cookie → 204", async () => {
+    const req = { cookies: {} };
+    const res = makeRes();
+    await signOut(req, res);
+    expect(res.sendStatus).toHaveBeenCalledWith(204);
+    expect(res.clearCookie).not.toHaveBeenCalled();
+  });
+
+  it("TC-SO-02: Có token nhưng session không tồn tại trong DB → clearCookie và 204", async () => {
+    mockSessionFindOne.mockResolvedValue(null);
+    const req = { cookies: { refreshToken: "invalid_token" } };
+    const res = makeRes();
+    await signOut(req, res);
+    expect(res.clearCookie).toHaveBeenCalledWith("refreshToken");
+    expect(res.sendStatus).toHaveBeenCalledWith(204);
+    expect(mockUserFindByIdAndUpdate).not.toHaveBeenCalled();
+    expect(mockSessionDeleteOne).not.toHaveBeenCalled();
+  });
+
+  it("TC-SO-03: Có token và session hợp lệ → Cập nhật lastActiveAt, xóa session, clearCookie và 204", async () => {
+    mockSessionFindOne.mockResolvedValue({ _id: "s1", userId: "u123", refreshToken: "valid_token" });
+    mockUserFindByIdAndUpdate.mockResolvedValue({});
+    mockSessionDeleteOne.mockResolvedValue({});
+
+    const req = { cookies: { refreshToken: "valid_token" } };
+    const res = makeRes();
+    await signOut(req, res);
+
+    expect(mockUserFindByIdAndUpdate).toHaveBeenCalledWith("u123", expect.objectContaining({ lastActiveAt: expect.any(Date) }));
+    expect(mockSessionDeleteOne).toHaveBeenCalledWith({ refreshToken: "valid_token" });
+    expect(res.clearCookie).toHaveBeenCalledWith("refreshToken");
+    expect(res.sendStatus).toHaveBeenCalledWith(204);
+  });
+
+  it("TC-SO-04: DB ném lỗi khi signOut → 500", async () => {
+    mockSessionFindOne.mockRejectedValue(new Error("DB Error"));
+    const req = { cookies: { refreshToken: "valid_token" } };
+    const res = makeRes();
+    await signOut(req, res);
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.json).toHaveBeenCalledWith({ message: "Lỗi hệ thống" });
+  });
+});
+
+// ════════════════════════════════════════════════════════════════════════════
+// NHÓM 10 — refreshToken — 6 luồng
 // ════════════════════════════════════════════════════════════════════════════
 describe("refreshToken", () => {
   beforeEach(() => jest.clearAllMocks());
@@ -606,9 +818,9 @@ describe("refreshToken", () => {
     );
   });
 
-  it("TC-RT-02: Session không tồn tại → 401 SESSION_TERMINATED + clearCookie", async () => {
+  it("TC-RT-02: Session không tồn tại trong DB → 401 SESSION_TERMINATED + clearCookie", async () => {
     mockSessionFindOne.mockResolvedValue(null);
-    const req = { cookies: { refreshToken: "token123" } };
+    const req = { cookies: { refreshToken: "ghost_token" } };
     const res = makeRes();
     await refreshToken(req, res);
     expect(res.clearCookie).toHaveBeenCalledWith("refreshToken");
@@ -673,5 +885,14 @@ describe("refreshToken", () => {
     expect(res.json).toHaveBeenCalledWith(
       expect.objectContaining({ accessToken: "new_access_token" })
     );
+  });
+
+  it("TC-RT-06: DB ném lỗi khi refreshToken → 500", async () => {
+    mockSessionFindOne.mockRejectedValue(new Error("DB Error"));
+    const req = { cookies: { refreshToken: "token123" } };
+    const res = makeRes();
+    await refreshToken(req, res);
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.json).toHaveBeenCalledWith({ message: "Lỗi hệ thống" });
   });
 });

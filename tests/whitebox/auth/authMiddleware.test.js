@@ -169,4 +169,19 @@ describe("protectedRoute (authMiddleware)", () => {
     expect(req.user).toEqual(dbUser);
     expect(res.status).not.toHaveBeenCalled();
   });
+
+  // ── Nhánh 7: Bắt lỗi ngoại lệ không mong muốn → 500 ─────────────────────
+  it("TC-MW-07: Bắt lỗi ngoại lệ không mong muốn → 500 'Lỗi hệ thống'", async () => {
+    mockJwtVerify.mockImplementation(() => {
+      throw new Error("Unexpected crash");
+    });
+    const req = { headers: { authorization: "Bearer some_token" } };
+    const res = makeRes();
+    const next = jest.fn();
+
+    protectedRoute(req, res, next);
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.json).toHaveBeenCalledWith({ message: "Lỗi hệ thống" });
+    expect(next).not.toHaveBeenCalled();
+  });
 });
