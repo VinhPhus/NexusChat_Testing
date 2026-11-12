@@ -184,3 +184,4 @@ Khi thành viên hoàn thành xong phần của mình:
    - Cập nhật link file và trạng thái tại bảng tổng hợp ở đầu trang.
    - Thêm biểu đồ Mermaid tương ứng của hàm bạn đã vẽ để hiển thị trực quan ngay trên GitHub.
 4. Commit lên GitHub theo cú pháp Jira: `git commit -m "KAN-XX: Hoan thanh kiem thu White-box module ..."`
+
