@@ -20,11 +20,32 @@ scripts:
       });
 
       var jsonData = pm.response.json();
-      var token = jsonData.token || (jsonData.user && jsonData.user.token);
+      var token = jsonData.accessToken || jsonData.token || (jsonData.user && jsonData.user.token);
       if (token) {
           pm.collectionVariables.set("accessToken", token);
           pm.environment.set("accessToken", token);
           console.log("Saved accessToken:", token);
+      }
+
+      // Tự động tìm friendId thật từ danh sách bạn bè
+      var baseUrl = pm.collectionVariables.get("baseUrl") || "http://localhost:5002";
+      if (token) {
+          pm.sendRequest({
+              url: baseUrl + "/api/friends",
+              method: "GET",
+              header: { "Authorization": "Bearer " + token }
+          }, function (err, res) {
+              if (!err && res.code === 200) {
+                  var fData = res.json();
+                  var friends = fData.friends || fData;
+                  if (Array.isArray(friends) && friends.length > 0) {
+                      var validId = friends[0]._id || friends[0].id;
+                      pm.collectionVariables.set("receiverId", validId);
+                      pm.environment.set("receiverId", validId);
+                      console.log("Đã tự động gán receiverId là bạn bè thật:", validId);
+                  }
+              }
+          });
       }
     language: text/javascript
 order: 1000
