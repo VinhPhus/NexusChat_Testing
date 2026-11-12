@@ -9,9 +9,9 @@ Thư mục này lưu trữ toàn bộ tài liệu đặc tả, sơ đồ dòng �
 | STT | Thành viên | Module đảm nhiệm | File đặc tả Test Cases | File sơ đồ Draw.io | Sơ đồ CFG trực quan | Trạng thái |
 |:---:|:---|:---|:---|:---|:---:|:---:|
 | **TV1** | **Vinh Phú** | **Xác thực & Bảo mật (Auth & Security)** | [`auth_test_cases.md`](./auth_test_cases.md) | [`auth_CFG.drawio`](./auth_CFG.drawio) | [Xem sơ đồ](#1-module-xác-thực--bảo-mật-tv1--vinh-phú) | ✅ **Hoàn thành (65/65 Passed)** |
-| **TV2** | **Ookinaha** | **Tin nhắn & Streak (Messages & Streak)** | [`message_test_cases.md`](./message_test_cases.md) | `message_CFG.drawio` | [Xem sơ đồ](#2-module-tin-nhắn--chuỗi-streak-tv2--ookinaha) | 🔄 Đang hoàn thiện |
+| **TV2** | **Phuong Bao ** | **Tin nhắn & Streak (Messages & Streak)** | [`message_test_cases.md`](./message_test_cases.md) | `message_CFG.drawio` | [Xem sơ đồ](#2-module-tin-nhắn--chuỗi-streak-tv2--PhuongBao) | 🔄 Đang hoàn thiện |
 | **TV3** | **Trung Chiến** | **Bạn bè & Quyền riêng tư (Friendship & Privacy)** | `friend_test_cases.md` | `friend_CFG.drawio` | [Xem sơ đồ](#3-module-bạn-bè--quyền-riêng-tư-tv3--trung-chiến) | 🔄 Đang hoàn thiện |
-| **TV4** | **Nhật Duy / Phương Bảo** | **Người dùng & Dịch thuật/AI Services** | `user_service_test_cases.md` | `user_service_CFG.drawio` | [Xem sơ đồ](#4-module-người-dùng--dịch-thuật-tv4--nhật-duy--phương-bảo) | 🔄 Đang hoàn thiện |
+| **TV4** | **Nhật Duy ** | **Người dùng & Dịch thuật/AI Services** | `user_service_test_cases.md` | `user_service_CFG.drawio` | [Xem sơ đồ](#4-module-người-dùng--dịch-thuật-tv4--nhật-duy) | 🔄 Đang hoàn thiện |
 | **TV5** | **Giang Tỷ / Thành viên 5** | **Lập lịch & Đánh giá (Schedule & Reviews)** | `WHITEBOX_REPORT.md` | `schedule_CFG.drawio` | [Xem sơ đồ](#5-module-lập-lịch--đánh-giá-tv5--giang-tỷ) | 🔄 Đang hoàn thiện |
 
 ---
@@ -114,7 +114,7 @@ flowchart TD
 
 ---
 
-## 2. Module Tin nhắn & Chuỗi Streak (TV2 — Ookinaha)
+## 2. Module Tin nhắn & Chuỗi Streak (TV2 — Phuong Bao)
 - **Tài liệu đặc tả**: [`message_test_cases.md`](./message_test_cases.md)
 - **File Draw.io**: `message_CFG.drawio` *(Thành viên sẽ bổ sung sau)*
 
@@ -159,7 +159,7 @@ flowchart TD
 
 ---
 
-## 4. Module Người dùng & Dịch thuật (TV4 — Nhật Duy / Phương Bảo)
+## 4. Module Người dùng & Dịch thuật (TV4 — Nhật Duy)
 - **Tài liệu đặc tả**: `user_service_test_cases.md` *(Đang hoàn thiện)*
 - **File Draw.io**: `user_service_CFG.drawio` *(Đang hoàn thiện)*
 - **Hàm trọng tâm**: `translateText` (Multi-tier Fallback 4 tầng, $V(G) = 6$) trong `translateService.js` và `checkAIRateLimit` trong `aiRateLimiter.js`.
