@@ -11,7 +11,7 @@ Thư mục này lưu trữ toàn bộ tài liệu đặc tả, sơ đồ dòng �
 | **TV1** | **Vinh Phú** | **Xác thực & Bảo mật (Auth & Security)** | [`auth_test_cases.md`](./auth_test_cases.md) | [`auth_CFG.drawio`](./auth_CFG.drawio) | [Xem sơ đồ](#1-module-xác-thực--bảo-mật-tv1--vinh-phú) | ✅ **Hoàn thành (65/65 Passed)** |
 | **TV2** | **Phuong Bao ** | **Tin nhắn & Streak (Messages & Streak)** | [`message_test_cases.md`](./message_test_cases.md) | `message_CFG.drawio` | [Xem sơ đồ](#2-module-tin-nhắn--chuỗi-streak-tv2--PhuongBao) | 🔄 Đang hoàn thiện |
 | **TV3** | **Trung Chiến** | **Bạn bè & Quyền riêng tư (Friendship & Privacy)** | `friend_test_cases.md` | `friend_CFG.drawio` | [Xem sơ đồ](#3-module-bạn-bè--quyền-riêng-tư-tv3--trung-chiến) | 🔄 Đang hoàn thiện |
-| **TV4** | **Nhật Duy ** | **Người dùng & Dịch thuật/AI Services** | `user_service_test_cases.md` | `user_service_CFG.drawio` | [Xem sơ đồ](#4-module-người-dùng--dịch-thuật-tv4--nhật-duy) | 🔄 Đang hoàn thiện |
+| **TV4** | **Nhật Duy ** | **Người dùng & Dịch thuật/AI Services** | [`user_service_test_cases.md`](./user_service_test_cases.md) | [`user_service_CFG.drawio`](./user_service_CFG.drawio) | [Xem sơ đồ](#4-module-người-dùng--dịch-thuật-tv4--nhật-duy) | ✅ **Hoàn thành (42/42 Passed)** |
 | **TV5** | **Giang Tỷ / Thành viên 5** | **Lập lịch & Đánh giá (Schedule & Reviews)** | `WHITEBOX_REPORT.md` | `schedule_CFG.drawio` | [Xem sơ đồ](#5-module-lập-lịch--đánh-giá-tv5--giang-tỷ) | 🔄 Đang hoàn thiện |
 
 ---
@@ -160,10 +160,111 @@ flowchart TD
 ---
 
 ## 4. Module Người dùng & Dịch thuật (TV4 — Nhật Duy)
-- **Tài liệu đặc tả**: `user_service_test_cases.md` *(Đang hoàn thiện)*
-- **File Draw.io**: `user_service_CFG.drawio` *(Đang hoàn thiện)*
+- **Tài liệu đặc tả**: [`user_service_test_cases.md`](./user_service_test_cases.md) (42 Test Cases, Statement 100%, Branch 85.45%)
+- **File Draw.io gốc**: [`user_service_CFG.drawio`](./user_service_CFG.drawio)
 - **Hàm trọng tâm**: `translateText` (Multi-tier Fallback 4 tầng, $V(G) = 6$) trong `translateService.js` và `checkAIRateLimit` trong `aiRateLimiter.js`.
-- *(Thành viên 4 sẽ dán biểu đồ Mermaid và link file vẽ vào đây khi hoàn thành)*
+
+### 4.1 Sơ đồ CFG: Hàm `translateText()` (Dịch thuật đa tầng Fallback 4 cấp)
+- **Kiến trúc**: Multi-tier Fallback: Google GTX $\to$ Google Dict $\to$ MyMemory $\to$ Gemini AI $\to$ Exception.
+- **Độ phức tạp Cyclomatic**: $V(G) = P + 1 = 5 + 1 = \mathbf{6}$ (hoặc $V(G) = E - N + 2 = 20 - 16 + 2 = \mathbf{6}$).
+- **6 Basis Paths**:
+  1. **Path 1**: Text rỗng/khoảng trắng $\to$ Return chuỗi gốc.
+  2. **Path 2**: Gọi Google GTX thành công $\to$ Return kết quả GTX.
+  3. **Path 3**: GTX lỗi $\to$ Fallback Google Dict thành công $\to$ Return kết quả Dict.
+  4. **Path 4**: GTX & Dict lỗi $\to$ Fallback MyMemory thành công $\to$ Return kết quả MyMemory.
+  5. **Path 5**: GTX, Dict & MyMemory lỗi $\to$ Fallback Gemini 2.5 Flash thành công $\to$ Return kết quả AI.
+  6. **Path 6**: Cả 4 tầng đều lỗi $\to$ Throw Error thông báo thử lại sau.
+
+```mermaid
+flowchart TD
+    N1(["Node 1: Entry translateText(text, targetLang)"]):::startClass
+    N2{"Node 2: !text || !text.trim() ?"}:::decisionClass
+    N3["Node 3: Return text (Nguyên bản)"]:::successClass
+
+    N4["Node 4: Tầng 1: Thử gọi Google GTX"]:::processClass
+    N5{"Node 5: GTX thành công hay có lỗi ?"}:::decisionClass
+    N5_OK["Node 5a: Return kết quả GTX"]:::successClass
+    N6["Node 6: Catch err1 -> Log warn chuyển Tầng 2"]:::errorClass
+
+    N7["Node 7: Tầng 2: Thử gọi Google Dict"]:::processClass
+    N8{"Node 8: Dict thành công hay có lỗi ?"}:::decisionClass
+    N8_OK["Node 8a: Return kết quả Dict"]:::successClass
+    N9["Node 9: Catch err2 -> Log warn chuyển Tầng 3"]:::errorClass
+
+    N10["Node 10: Tầng 3: Thử gọi MyMemory"]:::processClass
+    N11{"Node 11: MyMemory thành công hay có lỗi ?"}:::decisionClass
+    N11_OK["Node 11a: Return kết quả MyMemory"]:::successClass
+    N12["Node 12: Catch err3 -> Log warn chuyển Tầng 4"]:::errorClass
+
+    N13["Node 13: Tầng 4: Thử gọi Gemini AI"]:::processClass
+    N14{"Node 14: Gemini thành công hay có lỗi ?"}:::decisionClass
+    N14_OK["Node 14a: Return kết quả Gemini AI"]:::successClass
+    N15["Node 15: Catch err4 -> Log error tất cả thất bại"]:::errorClass
+    N16["Node 16: Throw new Error('Không thể dịch...')"]:::endClass
+
+    EndNode(["END: Kết thúc hàm"]):::startClass
+
+    N1 --> N2
+    N2 -- True --> N3 --> EndNode
+    N2 -- False --> N4 --> N5
+    N5 -- Thành công --> N5_OK --> EndNode
+    N5 -- Exception --> N6 --> N7 --> N8
+    N8 -- Thành công --> N8_OK --> EndNode
+    N8 -- Exception --> N9 --> N10 --> N11
+    N11 -- Thành công --> N11_OK --> EndNode
+    N11 -- Exception --> N12 --> N13 --> N14
+    N14 -- Thành công --> N14_OK --> EndNode
+    N14 -- Exception --> N15 --> N16 --> EndNode
+
+    classDef startClass fill:#dbeafe,stroke:#3b82f6,stroke-width:2px;
+    classDef decisionClass fill:#fef3c7,stroke:#f59e0b,stroke-width:2px;
+    classDef processClass fill:#f1f5f9,stroke:#94a3b8,stroke-width:1px;
+    classDef errorClass fill:#fee2e2,stroke:#ef4444,stroke-width:1px;
+    classDef successClass fill:#d1fae5,stroke:#10b981,stroke-width:2px;
+    classDef endClass fill:#f87171,stroke:#b91c1c,stroke-width:2px;
+```
+
+### 4.2 Sơ đồ CFG: Hàm `checkAIRateLimit()` (Giới hạn tần suất AI Sliding Window)
+- **Độ phức tạp Cyclomatic**: $V(G) = P + 1 = 2 + 1 = \mathbf{3}$
+- **3 Đường dẫn cơ sở**:
+  - **Path 1**: User mới chưa có trong Map $\to$ Khởi tạo mảng rỗng $\to$ Lưu timestamp và cho phép (`true`).
+  - **Path 2**: User đã tồn tại, số request trong 60s $< 5$ $\to$ Thêm timestamp và cho phép (`true`).
+  - **Path 3**: User đã tồn tại, số request trong 60s $\ge 5$ $\to$ Chặn request (`false`).
+
+```mermaid
+flowchart TD
+    R1(["Node 1: Entry -> now = Date.now()"]):::startClass
+    R2{"Node 2: !requestCounts.has(userId) ?"}:::decisionClass
+    R3["Node 3: requestCounts.set(userId, [])"]:::processClass
+    R4["Node 4: timestamps = requestCounts.get(userId)<br/>recentTimestamps = timestamps.filter(...)"]:::processClass
+    R5{"Node 5: recentTimestamps.length >= MAX_REQUESTS (5) ?"}:::decisionClass
+    R6["Node 6: requestCounts.set(userId, recentTimestamps)<br/>Return false (Bị chặn)"]:::errorClass
+    R7["Node 7: recentTimestamps.push(now)<br/>requestCounts.set(userId, recentTimestamps)<br/>Return true (Hợp lệ)"]:::successClass
+    REnd(["END"]):::startClass
+
+    R1 --> R2
+    R2 -- True --> R3 --> R4
+    R2 -- False --> R4
+    R4 --> R5
+    R5 -- True (>= 5) --> R6 --> REnd
+    R5 -- False (< 5) --> R7 --> REnd
+
+    classDef startClass fill:#dbeafe,stroke:#3b82f6,stroke-width:2px;
+    classDef decisionClass fill:#fef3c7,stroke:#f59e0b,stroke-width:2px;
+    classDef processClass fill:#f1f5f9,stroke:#94a3b8,stroke-width:1px;
+    classDef errorClass fill:#fee2e2,stroke:#ef4444,stroke-width:1px;
+    classDef successClass fill:#d1fae5,stroke:#10b981,stroke-width:2px;
+```
+
+### 4.3 Phân tích Luồng Dữ Liệu (Data Flow Analysis) cho `checkAIRateLimit`
+| Biến (Variable) | Node | Hành động (Action) | Ý nghĩa (Description) | DU-Path |
+|---|:---:|:---:|---|---|
+| `timestamps` | 4 | **def** | Gán từ `requestCounts.get(userId)` | (Node 4 $\to$ Node 4) |
+| `timestamps` | 4 | **c-use** | Sử dụng trong `.filter(...)` tính `recentTimestamps` | (Được bao phủ 100%) |
+| `recentTimestamps` | 4 | **def** | Khởi tạo mảng kết quả sau khi lọc theo `WINDOW_MS` | (Node 4 $\to$ Node 5, 6, 7) |
+| `recentTimestamps` | 5 | **p-use** | Kiểm tra độ dài `.length >= MAX_REQUESTS` | (Node 4 $\to$ Node 5 [True/False]) |
+| `recentTimestamps` | 6 | **c-use** | Ghi đè vào `requestCounts` khi bị chặn rate limit | (Node 4 $\to$ Node 5 $\to$ Node 6) |
+| `recentTimestamps` | 7 | **c-use** | Gọi `.push(now)` và ghi đè vào `requestCounts` khi hợp lệ | (Node 4 $\to$ Node 5 $\to$ Node 7) |
 
 ---
 
