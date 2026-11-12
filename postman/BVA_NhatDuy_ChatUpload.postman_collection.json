@@ -1,0 +1,729 @@
+{
+	"info": {
+		"_postman_id": "bva-tv2-chat-upload-collection",
+		"name": "BVA Test Suite - Thành Viên 2 (Gửi Tin Nhắn & Tệp Đính Kèm)",
+		"description": "Bộ kịch bản kiểm thử giá trị biên tự động hóa dành riêng cho Thành viên 2: Gửi tin nhắn & Tệp đính kèm (Chat & Upload). Tuân thủ nghiêm ngặt công thức Standard BVA (4n + 1 = 9 cases) và mở rộng Robustness BVA.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{accessToken}}",
+				"type": "string"
+			}
+		]
+	},
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:5002",
+			"type": "string"
+		},
+		{
+			"key": "accessToken",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "receiverId",
+			"value": "66bcde1234567890abcdef02",
+			"type": "string"
+		},
+		{
+			"key": "msg500",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "msg1999",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "msg2000",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "msg2001",
+			"value": "",
+			"type": "string"
+		}
+	],
+	"item": [
+		{
+			"name": "0. Xác thực & Đăng nhập (Setup)",
+			"item": [
+				{
+					"name": "0.1 Đăng nhập lấy Bearer Token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Đăng nhập thành công - HTTP 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"var jsonData = pm.response.json();",
+									"var token = jsonData.accessToken || jsonData.token || (jsonData.user && jsonData.user.token);",
+									"if (token) {",
+									"    pm.collectionVariables.set(\"accessToken\", token);",
+									"    pm.environment.set(\"accessToken\", token);",
+									"    console.log(\"Saved accessToken:\", token);",
+									"}",
+									"",
+									"// Tự động tìm friendId thật từ danh sách bạn bè",
+									"var baseUrl = pm.collectionVariables.get(\"baseUrl\") || \"http://localhost:5002\";",
+									"if (token) {",
+									"    pm.sendRequest({",
+									"        url: baseUrl + \"/api/friends\",",
+									"        method: \"GET\",",
+									"        header: { \"Authorization\": \"Bearer \" + token }",
+									"    }, function (err, res) {",
+									"        if (!err && res.code === 200) {",
+									"            var fData = res.json();",
+									"            var friends = fData.friends || fData;",
+									"            if (Array.isArray(friends) && friends.length > 0) {",
+									"                var validId = friends[0]._id || friends[0].id;",
+									"                pm.collectionVariables.set(\"receiverId\", validId);",
+									"                pm.environment.set(\"receiverId\", validId);",
+									"                console.log(\"Đã tự động gán receiverId là bạn bè thật:\", validId);",
+									"            }",
+									"        }",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"username\": \"duy123\",\n  \"password\": \"Duy3101\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/signin",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"signin"
+							]
+						}
+					}
+				},
+				{
+					"name": "0.2 Lấy Danh Sách Bạn Bè (Auto-detect receiverId)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Lấy danh sách bạn bè thành công - HTTP 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"var jsonData = pm.response.json();",
+									"var friends = jsonData.friends || jsonData;",
+									"if (Array.isArray(friends) && friends.length > 0) {",
+									"    var validId = friends[0]._id || friends[0].id;",
+									"    pm.collectionVariables.set(\"receiverId\", validId);",
+									"    pm.environment.set(\"receiverId\", validId);",
+									"    console.log(\"Đã lưu friendId vào receiverId:\", validId);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/friends",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"friends"
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "1. Standard BVA Test Cases (4n + 1 = 9 Cases)",
+			"item": [
+				{
+					"name": "TC_BVA_01: msg_len=1 (Min), file_size=10MB (Nom)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"HTTP 201 - Gửi thành công tin nhắn 1 ký tự kèm tệp 10MB\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"var jsonData = pm.response.json();",
+									"pm.expect(jsonData.message.content).to.eql(\".\");",
+									"pm.expect(jsonData.message.fileSize).to.eql(10485760);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"recipientId\": \"{{receiverId}}\",\n  \"content\": \".\",\n  \"fileUrl\": \"https://drive.google.com/test_10mb.pdf\",\n  \"fileName\": \"doc_10mb.pdf\",\n  \"fileSize\": 10485760\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/messages/direct",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"messages",
+								"direct"
+							]
+						}
+					}
+				},
+				{
+					"name": "TC_BVA_02: msg_len=2 (Min+), file_size=10MB (Nom)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"HTTP 201 - Gửi thành công tin nhắn 2 ký tự kèm tệp 10MB\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"var jsonData = pm.response.json();",
+									"pm.expect(jsonData.message.content).to.eql(\"OK\");"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"recipientId\": \"{{receiverId}}\",\n  \"content\": \"OK\",\n  \"fileUrl\": \"https://drive.google.com/test_10mb.pdf\",\n  \"fileName\": \"doc_10mb.pdf\",\n  \"fileSize\": 10485760\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/messages/direct",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"messages",
+								"direct"
+							]
+						}
+					}
+				},
+				{
+					"name": "TC_BVA_03: msg_len=500 (Nom), file_size=10MB (Nom) [Baseline]",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"var str500 = \"X\".repeat(500);",
+									"pm.collectionVariables.set(\"msg500\", str500);"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"HTTP 201 - Baseline Test Case thành công\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"var jsonData = pm.response.json();",
+									"pm.expect(jsonData.message.content.length).to.eql(500);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"recipientId\": \"{{receiverId}}\",\n  \"content\": \"{{msg500}}\",\n  \"fileUrl\": \"https://drive.google.com/test_10mb.pdf\",\n  \"fileName\": \"doc_10mb.pdf\",\n  \"fileSize\": 10485760\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/messages/direct",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"messages",
+								"direct"
+							]
+						}
+					}
+				},
+				{
+					"name": "TC_BVA_04: msg_len=1999 (Max-), file_size=10MB (Nom)",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"var str1999 = \"A\".repeat(1999);",
+									"pm.collectionVariables.set(\"msg1999\", str1999);"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"HTTP 201 - Chấp nhận chuỗi dài 1999 ký tự\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"var jsonData = pm.response.json();",
+									"pm.expect(jsonData.message.content.length).to.eql(1999);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"recipientId\": \"{{receiverId}}\",\n  \"content\": \"{{msg1999}}\",\n  \"fileUrl\": \"https://drive.google.com/test_10mb.pdf\",\n  \"fileName\": \"doc_10mb.pdf\",\n  \"fileSize\": 10485760\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/messages/direct",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"messages",
+								"direct"
+							]
+						}
+					}
+				},
+				{
+					"name": "TC_BVA_05: msg_len=2000 (Max), file_size=10MB (Nom)",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"var str2000 = \"B\".repeat(2000);",
+									"pm.collectionVariables.set(\"msg2000\", str2000);"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"HTTP 201 - Chấp nhận tối đa 2000 ký tự\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"var jsonData = pm.response.json();",
+									"pm.expect(jsonData.message.content.length).to.eql(2000);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"recipientId\": \"{{receiverId}}\",\n  \"content\": \"{{msg2000}}\",\n  \"fileUrl\": \"https://drive.google.com/test_10mb.pdf\",\n  \"fileName\": \"doc_10mb.pdf\",\n  \"fileSize\": 10485760\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/messages/direct",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"messages",
+								"direct"
+							]
+						}
+					}
+				},
+				{
+					"name": "TC_BVA_06: msg_len=500 (Nom), file_size=1MB (Min)",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"if (!pm.collectionVariables.get(\"msg500\")) {",
+									"    pm.collectionVariables.set(\"msg500\", \"X\".repeat(500));",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"HTTP 201 - Gửi thành công tệp kích thước tối thiểu 1MB\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"var jsonData = pm.response.json();",
+									"pm.expect(jsonData.message.fileSize).to.eql(1048576);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"recipientId\": \"{{receiverId}}\",\n  \"content\": \"{{msg500}}\",\n  \"fileUrl\": \"https://drive.google.com/test_1mb.pdf\",\n  \"fileName\": \"doc_1mb.pdf\",\n  \"fileSize\": 1048576\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/messages/direct",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"messages",
+								"direct"
+							]
+						}
+					}
+				},
+				{
+					"name": "TC_BVA_07: msg_len=500 (Nom), file_size=2MB (Min+)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"HTTP 201 - Gửi thành công tệp 2MB\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"var jsonData = pm.response.json();",
+									"pm.expect(jsonData.message.fileSize).to.eql(2097152);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"recipientId\": \"{{receiverId}}\",\n  \"content\": \"{{msg500}}\",\n  \"fileUrl\": \"https://drive.google.com/test_2mb.pdf\",\n  \"fileName\": \"doc_2mb.pdf\",\n  \"fileSize\": 2097152\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/messages/direct",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"messages",
+								"direct"
+							]
+						}
+					}
+				},
+				{
+					"name": "TC_BVA_08: msg_len=500 (Nom), file_size=24MB (Max-)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"HTTP 201 - Gửi thành công tệp sát trần 24MB\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"var jsonData = pm.response.json();",
+									"pm.expect(jsonData.message.fileSize).to.eql(25165824);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"recipientId\": \"{{receiverId}}\",\n  \"content\": \"{{msg500}}\",\n  \"fileUrl\": \"https://drive.google.com/test_24mb.zip\",\n  \"fileName\": \"doc_24mb.zip\",\n  \"fileSize\": 25165824\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/messages/direct",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"messages",
+								"direct"
+							]
+						}
+					}
+				},
+				{
+					"name": "TC_BVA_09: msg_len=500 (Nom), file_size=25MB (Max)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"HTTP 201 - Chấp nhận tệp đúng ngưỡng trần 25MB\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"var jsonData = pm.response.json();",
+									"pm.expect(jsonData.message.fileSize).to.eql(26214400);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"recipientId\": \"{{receiverId}}\",\n  \"content\": \"{{msg500}}\",\n  \"fileUrl\": \"https://drive.google.com/test_25mb.zip\",\n  \"fileName\": \"doc_25mb.zip\",\n  \"fileSize\": 26214400\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/messages/direct",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"messages",
+								"direct"
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "2. Robustness BVA Test Cases (Ngoại Lệ: Min-1, Max+1)",
+			"item": [
+				{
+					"name": "TC_ROB_01: msg_len=0 (Min-1), file_size=0 (Không kèm tệp)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"HTTP 400 - Từ chối khi không có nội dung và không có tệp đính kèm\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});",
+									"var jsonData = pm.response.json();",
+									"pm.expect(jsonData.message).to.include(\"Thiếu nội dung hoặc file đính kèm\");"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"recipientId\": \"{{receiverId}}\",\n  \"content\": \"\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/messages/direct",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"messages",
+								"direct"
+							]
+						}
+					}
+				},
+				{
+					"name": "TC_ROB_02: msg_len=2001 (Max+1), file_size=10MB (Nom)",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"var str2001 = \"Z\".repeat(2001);",
+									"pm.collectionVariables.set(\"msg2001\", str2001);"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Kiểm soát dữ liệu vượt ngưỡng 2000 ký tự (HTTP 201 tự cắt chuỗi hoặc HTTP 400)\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([201, 400]);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"recipientId\": \"{{receiverId}}\",\n  \"content\": \"{{msg2001}}\",\n  \"fileUrl\": \"https://drive.google.com/test_10mb.pdf\",\n  \"fileName\": \"doc_10mb.pdf\",\n  \"fileSize\": 10485760\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/messages/direct",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"messages",
+								"direct"
+							]
+						}
+					}
+				},
+				{
+					"name": "TC_ROB_03: Upload tệp rỗng 0 Byte (Min-1)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"HTTP 400 - Từ chối tải tệp rỗng không có nội dung\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": []
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/messages/upload-file",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"messages",
+								"upload-file"
+							]
+						}
+					}
+				}
+			]
+		}
+	]
+}
