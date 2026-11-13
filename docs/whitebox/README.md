@@ -9,7 +9,7 @@ Thư mục này lưu trữ toàn bộ tài liệu đặc tả, sơ đồ dòng �
 | STT | Thành viên | Module đảm nhiệm | File đặc tả Test Cases | File sơ đồ Draw.io | Sơ đồ CFG trực quan | Trạng thái |
 |:---:|:---|:---|:---|:---|:---:|:---:|
 | **TV1** | **Vinh Phú** | **Xác thực & Bảo mật (Auth & Security)** | [`auth_test_cases.md`](./auth_test_cases.md) | [`auth_CFG.drawio`](./auth_CFG.drawio) | [Xem sơ đồ](#1-module-xác-thực--bảo-mật-tv1--vinh-phú) | ✅ **Hoàn thành (65/65 Passed)** |
-| **TV2** | **Phuong Bao ** | **Tin nhắn & Streak (Messages & Streak)** | [`message_test_cases.md`](./message_test_cases.md) | `message_CFG.drawio` | [Xem sơ đồ](#2-module-tin-nhắn--chuỗi-streak-tv2--PhuongBao) | 🔄 Đang hoàn thiện |
+| **TV2** | **Phuong Bao** | **Tin nhắn & Streak (Messages & Streak)** | [`message_test_cases.md`](./message_test_cases.md) | [`message_CFG.drawio`](./message_CFG.drawio) | [Xem sơ đồ](#2-module-tin-nhắn--chuỗi-streak-tv2--PhuongBao) | ✅ **87/87 tests passed; coverage đạt ngưỡng** |
 | **TV3** | **Trung Chiến** | **Bạn bè & Quyền riêng tư (Friendship & Privacy)** | `friend_test_cases.md` | `friend_CFG.drawio` | [Xem sơ đồ](#3-module-bạn-bè--quyền-riêng-tư-tv3--trung-chiến) | 🔄 Đang hoàn thiện |
 | **TV4** | **Nhật Duy ** | **Người dùng & Dịch thuật/AI Services** | [`user_service_test_cases.md`](./user_service_test_cases.md) | [`user_service_CFG.drawio`](./user_service_CFG.drawio) | [Xem sơ đồ](#4-module-người-dùng--dịch-thuật-tv4--nhật-duy) | ✅ **Hoàn thành (42/42 Passed)** |
 | **TV5** | **Giang Tỷ / Thành viên 5** | **Lập lịch & Đánh giá (Schedule & Reviews)** | `WHITEBOX_REPORT.md` | `schedule_CFG.drawio` | [Xem sơ đồ](#5-module-lập-lịch--đánh-giá-tv5--giang-tỷ) | 🔄 Đang hoàn thiện |
@@ -115,11 +115,13 @@ flowchart TD
 ---
 
 ## 2. Module Tin nhắn & Chuỗi Streak (TV2 — Phuong Bao)
-- **Tài liệu đặc tả**: [`message_test_cases.md`](./message_test_cases.md)
-- **File Draw.io**: `message_CFG.drawio` *(Thành viên sẽ bổ sung sau)*
+- **Tài liệu đặc tả và coverage**: [`message_test_cases.md`](./message_test_cases.md)
+- **File Draw.io**: [`message_CFG.drawio`](./message_CFG.drawio) (CFG cho `sendDirectMessage`, `getEffectiveStreak` và `updateConversationAfterCreateMessage`)
+- **Jest tests**: [`messageController.test.js`](../../tests/whitebox/message/messageController.test.js), [`messageControllerOther.test.js`](../../tests/whitebox/message/messageControllerOther.test.js), [`messageHelper.test.js`](../../tests/whitebox/message/messageHelper.test.js)
+- **Kết quả**: 87/87 tests passed. `messageController.js` đạt Statements 99.07% / Branches 90.19%; `messageHelper.js` đạt Statements 100% / Branches 93.75%. Các giới hạn còn lại (model `Game.js` thiếu và export `sendDirectMessageFile` không tồn tại) được ghi trong báo cáo.
 
 ### Sơ đồ CFG: Hàm `getEffectiveStreak()`
-- **Độ phức tạp Cyclomatic**: $V(G) = 13 - 10 + 2 = \mathbf{5}$
+- **Độ phức tạp Cyclomatic source-level**: $V(G) = 23 - 17 + 2 = \mathbf{8}$ (tách short-circuit)
 
 ```mermaid
 flowchart TD

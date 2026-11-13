@@ -1,6 +1,6 @@
 /**
  * White-Box Tests — messageHelper.js
- * TV2 (Ookinaha)
+ * TV2 (PhuongBao)
  *
  * Coverage:
  *  - getDayDifference(d1, d2)
@@ -136,6 +136,22 @@ describe("getEffectiveStreak", () => {
     expect(result.isBothMessaged).toBe(true);
     expect(result.senders).toEqual(["a", "b"]);
   });
+
+  it("TC-GS-07: senders không phải mảng thì trả về mảng rỗng", () => {
+    const streak = {
+      count: 3,
+      lastMessageDate: new Date(),
+      isBothMessaged: true,
+      senders: "user-a",
+    };
+
+    expect(getEffectiveStreak(streak)).toEqual({
+      count: 3,
+      lastMessageDate: streak.lastMessageDate,
+      senders: [],
+      isBothMessaged: true,
+    });
+  });
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -215,5 +231,165 @@ describe("updateConversationAfterCreateMessage — finalContent", () => {
   it("Branch 8: content rỗng hoàn toàn → ''", async () => {
     const result = await getFinalContent({});
     expect(result).toBe("");
+  });
+});
+
+describe("updateConversationAfterCreateMessage — unread counts and streak", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockMessageFind.mockReturnValue({
+      select: jest.fn().mockReturnThis(),
+      limit: jest.fn().mockResolvedValue([]),
+    });
+  });
+
+  async function updateWithStreak(streak, todayMessages = []) {
+    mockMessageFind.mockReturnValue({
+      select: jest.fn().mockReturnThis(),
+      limit: jest.fn().mockResolvedValue(todayMessages),
+    });
+    const conversation = makeConversation({ streak });
+    const message = { _id: "msg1", createdAt: new Date(), content: "Hi" };
+    await updateConversationAfterCreateMessage(conversation, message, "user-a");
+    return conversation;
+  }
+
+  it("TC-UC-01: Reset unread count sender, tăng recipient và đánh dấu streak thay đổi", async () => {
+    const unreadCounts = new Map([
+      ["user-a", 4],
+      ["user-b", 2],
+    ]);
+    const conversation = makeConversation({ unreadCounts });
+    mockMessageFind.mockReturnValue({
+      select: jest.fn().mockReturnThis(),
+      limit: jest.fn().mockResolvedValue([]),
+    });
+
+    await updateConversationAfterCreateMessage(
+      conversation,
+      { _id: "msg1", createdAt: new Date(), content: "Hi" },
+      "user-a"
+    );
+
+    expect(unreadCounts.get("user-a")).toBe(0);
+    expect(unreadCounts.get("user-b")).toBe(3);
+    expect(conversation.markModified).toHaveBeenCalledWith("streak");
+    expect(conversation.streak.count).toBe(1);
+  });
+
+  it("TC-UC-02: Không có streak trước đó thì bắt đầu từ 1", async () => {
+    const conversation = await updateWithStreak(null);
+
+    expect(conversation.streak.count).toBe(1);
+    expect(conversation.streak.isBothMessaged).toBe(false);
+  });
+
+  it("TC-UC-03: Streak cũ từ hai ngày trở lên bắt đầu lại từ 1", async () => {
+    const oldDate = new Date();
+    oldDate.setDate(oldDate.getDate() - 3);
+    const conversation = await updateWithStreak({
+      count: 8,
+      lastMessageDate: oldDate,
+      senders: [],
+      isBothMessaged: false,
+    });
+
+    expect(conversation.streak.count).toBe(1);
+  });
+
+  it("TC-UC-04: Ngày kế tiếp tăng streak khi cả hai thành viên đã nhắn", async () => {
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    const conversation = await updateWithStreak(
+      { count: 4, lastMessageDate: yesterday, senders: [], isBothMessaged: false },
+      [{ senderId: "user-b" }]
+    );
+
+    expect(conversation.streak.count).toBe(5);
+    expect(conversation.streak.isBothMessaged).toBe(true);
+  });
+
+  it("TC-UC-05: Ngày kế tiếp giữ streak nếu người còn lại chưa nhắn", async () => {
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    const conversation = await updateWithStreak({
+      count: 4,
+      lastMessageDate: yesterday,
+      senders: [],
+      isBothMessaged: false,
+    });
+
+    expect(conversation.streak.count).toBe(4);
+    expect(conversation.streak.isBothMessaged).toBe(false);
+  });
+
+  it("TC-UC-06: Cùng ngày giữ streak hiện tại", async () => {
+    const conversation = await updateWithStreak({
+      count: 4,
+      lastMessageDate: new Date(),
+      senders: [],
+      isBothMessaged: false,
+    });
+
+    expect(conversation.streak.count).toBe(4);
+  });
+
+  it("TC-UC-07: Tin nhắn nhóm cập nhật last message nhưng không truy vấn hay đổi streak", async () => {
+    const conversation = makeConversation({
+      type: "group",
+      streak: { count: 7, lastMessageDate: new Date("2024-01-01") },
+    });
+    const message = { _id: "msg1", createdAt: new Date(), content: "Group message" };
+
+    await updateConversationAfterCreateMessage(conversation, message, "user-a");
+
+    expect(conversation.lastMessage.content).toBe("Group message");
+    expect(conversation.streak.count).toBe(7);
+    expect(mockMessageFind).not.toHaveBeenCalled();
+    expect(conversation.markModified).not.toHaveBeenCalled();
+  });
+
+  it("TC-UC-08: Hỗ trợ unreadCounts dạng object và các dạng participant ID", async () => {
+    const conversation = makeConversation({
+      participants: [
+        { userId: { _id: "user-a" } },
+        { _id: "user-b" },
+      ],
+      unreadCounts: { "user-a": 3, "user-b": 2 },
+      streak: {
+        count: 2,
+        lastMessageDate: new Date(),
+        toObject() {
+          return { count: 2, lastMessageDate: this.lastMessageDate };
+        },
+      },
+      markModified: undefined,
+    });
+
+    await updateConversationAfterCreateMessage(
+      conversation,
+      { _id: "msg1", createdAt: new Date(), content: "Hi" },
+      "user-a"
+    );
+
+    expect(conversation.lastMessage.senderId).toBe("user-a");
+    expect(conversation.streak.isBothMessaged).toBe(false);
+    expect(conversation.markModified).toBeUndefined();
+  });
+
+  it("TC-UC-09: Một participant không được coi là cả hai bên đã nhắn", async () => {
+    const conversation = makeConversation({
+      participants: [{ userId: "user-a" }],
+      streak: { count: 2, lastMessageDate: new Date() },
+    });
+
+    await updateConversationAfterCreateMessage(
+      conversation,
+      { _id: "msg1", createdAt: new Date(), content: "Hi" },
+      "user-a"
+    );
+
+    expect(conversation.streak.isBothMessaged).toBe(false);
+    expect(conversation.streak.count).toBe(2);
   });
 });

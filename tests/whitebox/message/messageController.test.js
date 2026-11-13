@@ -1,6 +1,6 @@
 /**
  * White-Box Tests — messageController.js → sendDirectMessage()
- * TV2 (Ookinaha)
+ * TV2 (PhuongBao)
  *
  * Coverage:
  *  TC-SM-01  Thiếu content, audioUrl, imgUrl, fileUrl, sharedContactId → 400
@@ -83,6 +83,8 @@ const { sendDirectMessage } = await import(
  * Build a minimal Express-style request object.
  */
 function makeReq(overrides = {}) {
+  const { body: bodyOverrides, ...requestOverrides } = overrides;
+
   return {
     body: {
       recipientId: "recipient-id",
@@ -99,11 +101,11 @@ function makeReq(overrides = {}) {
       fileName: undefined,
       fileSize: undefined,
       sharedContactId: undefined,
-      ...overrides.body,
+      ...bodyOverrides,
     },
     user: { _id: "sender-id" },
     app: { get: jest.fn().mockReturnValue(null) }, // no io
-    ...overrides,
+    ...requestOverrides,
   };
 }
 
@@ -332,4 +334,154 @@ describe("sendDirectMessage", () => {
     expect(capturedArgs.isViewOnce).toBe(true);
     expect(res.status).toHaveBeenCalledWith(201);
   });
+
+it.each([
+  ["audioUrl", "https://audio.example/voice.mp3"],
+  ["imgUrl", "https://image.example/photo.png"],
+  ["fileUrl", "https://file.example/report.pdf"],
+  ["sharedContactId", "contact-id"],
+])("TC-SM-09: Chỉ có %s vẫn gửi được tin nhắn", async (field, value) => {
+  const conv = makeConversation();
+  mockConversationFindOne.mockResolvedValue(conv);
+  mockMessageCreate.mockImplementation((args) => Promise.resolve(makeMessage(args)));
+  const req = makeReq({ body: { content: "", [field]: value } });
+  const res = makeRes();
+
+  await sendDirectMessage(req, res);
+
+  expect(mockMessageCreate).toHaveBeenCalledWith(
+    expect.objectContaining({
+      [field === "sharedContactId" ? "sharedContact" : field]: value,
+    })
+  );
+  expect(res.status).toHaveBeenCalledWith(201);
+});
+
+it("TC-SM-10: Dùng conversationId dự phòng khi conversation direct chưa tìm thấy", async () => {
+  const conv = makeConversation();
+  mockConversationFindOne.mockResolvedValue(null);
+  mockConversationFindById.mockResolvedValue(conv);
+  mockMessageCreate.mockResolvedValue(makeMessage());
+  const req = makeReq({
+    body: { recipientId: "recipient-id", conversationId: "conv-id", content: "Hello" },
+  });
+  const res = makeRes();
+
+  await sendDirectMessage(req, res);
+
+  expect(mockConversationFindById).toHaveBeenCalledWith("conv-id");
+  expect(mockConversationCreate).not.toHaveBeenCalled();
+  expect(res.status).toHaveBeenCalledWith(201);
+});
+
+it("TC-SM-11: Bỏ qua conversationId nếu người nhận không tham gia conversation đó", async () => {
+  const unrelatedConv = makeConversation({
+    participants: [{ userId: "sender-id" }, { userId: "another-user" }],
+  });
+  const newConv = makeConversation();
+  mockConversationFindOne.mockResolvedValue(null);
+  mockConversationFindById.mockResolvedValue(unrelatedConv);
+  mockConversationCreate.mockResolvedValue(newConv);
+  mockMessageCreate.mockResolvedValue(makeMessage());
+  const req = makeReq({
+    body: { recipientId: "recipient-id", conversationId: "conv-id", content: "Hello" },
+  });
+  const res = makeRes();
+
+  await sendDirectMessage(req, res);
+
+  expect(mockConversationCreate).toHaveBeenCalledTimes(1);
+  expect(res.status).toHaveBeenCalledWith(201);
+});
+
+it("TC-SM-12: Tìm conversation theo ID khi request không có recipientId", async () => {
+  const conv = makeConversation();
+  mockConversationFindById.mockResolvedValue(conv);
+  mockMessageCreate.mockResolvedValue(makeMessage());
+  const req = makeReq({
+    body: { recipientId: undefined, conversationId: "conv-id", content: "Hello" },
+  });
+  const res = makeRes();
+
+  await sendDirectMessage(req, res);
+
+  expect(mockConversationFindOne).not.toHaveBeenCalled();
+  expect(mockConversationFindById).toHaveBeenCalledWith("conv-id");
+  expect(mockConversationCreate).not.toHaveBeenCalled();
+  expect(res.status).toHaveBeenCalledWith(201);
+});
+
+it("TC-SM-13: Phát sự kiện new-message tới từng thành viên khi có socket", async () => {
+  const conv = makeConversation();
+  const emit = jest.fn();
+  const io = { to: jest.fn().mockReturnValue({ emit }) };
+  mockConversationFindOne.mockResolvedValue(conv);
+  mockMessageCreate.mockResolvedValue(makeMessage());
+  const req = makeReq({ body: { content: "Hello" }, app: { get: jest.fn().mockReturnValue(io) } });
+  const res = makeRes();
+
+  await sendDirectMessage(req, res);
+
+  expect(io.to).toHaveBeenCalledTimes(2);
+  expect(emit).toHaveBeenCalledTimes(2);
+  expect(emit).toHaveBeenCalledWith(
+    "new-message",
+    expect.objectContaining({
+      message: expect.anything(),
+      conversation: expect.objectContaining({ _id: conv._id }),
+      unreadCounts: {},
+    })
+  );
+});
+
+it("TC-SM-13b: Dùng unreadCounts rỗng nếu conversation chưa có map", async () => {
+  const conv = makeConversation({ unreadCounts: null });
+  expect(conv.unreadCounts).toBeNull();
+  const emit = jest.fn();
+  const io = { to: jest.fn().mockReturnValue({ emit }) };
+  mockConversationFindOne.mockResolvedValue(conv);
+  mockMessageCreate.mockResolvedValue(makeMessage());
+  const req = makeReq({ body: { content: "Hello" }, app: { get: jest.fn().mockReturnValue(io) } });
+  const res = makeRes();
+
+  await sendDirectMessage(req, res);
+
+  expect(emit).toHaveBeenCalledWith(
+    "new-message",
+    expect.objectContaining({ unreadCounts: {} })
+  );
+  expect(res.status).toHaveBeenCalledWith(201);
+});
+
+it("TC-SM-14: Gọi NexusAI qua mentions ID khi nội dung không có tên gọi", async () => {
+  const conv = makeConversation();
+  mockConversationFindOne.mockResolvedValue(conv);
+  mockMessageCreate.mockResolvedValue(makeMessage());
+  const req = makeReq({
+    body: { content: "Giúp mình với", mentions: ["000000000000000000000000"] },
+  });
+  const res = makeRes();
+
+  await sendDirectMessage(req, res);
+
+  expect(mockHandleAIResponse).toHaveBeenCalledWith(conv._id, null, "sender-id");
+  expect(res.status).toHaveBeenCalledWith(201);
+});
+
+it("TC-SM-15: Lỗi khi tạo message trả HTTP 500", async () => {
+  const conv = makeConversation();
+  const logError = jest.spyOn(console, "error").mockImplementation(() => {});
+  mockConversationFindOne.mockResolvedValue(conv);
+  mockMessageCreate.mockRejectedValue(new Error("database unavailable"));
+  const req = makeReq({ body: { content: "Hello" } });
+  const res = makeRes();
+
+  try {
+    await sendDirectMessage(req, res);
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.json).toHaveBeenCalledWith({ message: "Lỗi hệ thống" });
+  } finally {
+    logError.mockRestore();
+  }
+});
 });

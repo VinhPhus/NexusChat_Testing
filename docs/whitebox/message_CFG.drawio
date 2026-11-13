@@ -1,0 +1,166 @@
+<mxfile host="app.diagrams.net" modified="2026-11-12T08:30:00.000Z" agent="Copilot" version="24.7.17" type="device">
+  <diagram id="send-direct-message" name="sendDirectMessage">
+    <mxGraphModel dx="3300" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="3300" pageHeight="800" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+        <mxCell id="s1" value="Bắt đầu" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dbeafe;strokeColor=#3b82f6;" vertex="1" parent="1"><mxGeometry x="40" y="350" width="100" height="40" as="geometry"/></mxCell>
+        <mxCell id="s2" value="Có ít nhất một nội dung / tệp?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1"><mxGeometry x="180" y="330" width="150" height="80" as="geometry"/></mxCell>
+        <mxCell id="s3" value="HTTP 400" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1"><mxGeometry x="205" y="180" width="100" height="50" as="geometry"/></mxCell>
+        <mxCell id="s4" value="Có recipientId?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1"><mxGeometry x="390" y="330" width="120" height="80" as="geometry"/></mxCell>
+        <mxCell id="s5" value="Tìm direct conversation" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="570" y="250" width="150" height="50" as="geometry"/></mxCell>
+        <mxCell id="s6" value="Fallback conversationId?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1"><mxGeometry x="770" y="235" width="140" height="80" as="geometry"/></mxCell>
+        <mxCell id="s7" value="Tìm theo ID; recipient còn tham gia?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1"><mxGeometry x="980" y="225" width="160" height="90" as="geometry"/></mxCell>
+        <mxCell id="s8" value="Có conversationId khi không có recipient?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1"><mxGeometry x="570" y="470" width="160" height="90" as="geometry"/></mxCell>
+        <mxCell id="s9" value="Conversation tồn tại?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1"><mxGeometry x="1190" y="330" width="140" height="80" as="geometry"/></mxCell>
+        <mxCell id="s10" value="Tạo conversation mới" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="1390" y="460" width="150" height="50" as="geometry"/></mxCell>
+        <mxCell id="s11" value="Incognito đang hoạt động?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1"><mxGeometry x="1390" y="300" width="150" height="90" as="geometry"/></mxCell>
+        <mxCell id="s12" value="Incognito hết hạn?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1"><mxGeometry x="1600" y="280" width="140" height="80" as="geometry"/></mxCell>
+        <mxCell id="s13" value="Tắt incognito" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="1600" y="420" width="140" height="50" as="geometry"/></mxCell>
+        <mxCell id="s14" value="Dùng expiresIn tùy chỉnh?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1"><mxGeometry x="1800" y="300" width="140" height="80" as="geometry"/></mxCell>
+        <mxCell id="s15" value="Tính expiresAt" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="1800" y="440" width="140" height="50" as="geometry"/></mxCell>
+        <mxCell id="s16" value="Tạo message; cập nhật conversation; populate" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1"><mxGeometry x="2000" y="300" width="180" height="60" as="geometry"/></mxCell>
+        <mxCell id="s17" value="Có sharedContactId?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1"><mxGeometry x="2220" y="290" width="140" height="80" as="geometry"/></mxCell>
+        <mxCell id="s18" value="Populate sharedContact" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="2420" y="200" width="150" height="50" as="geometry"/></mxCell>
+        <mxCell id="s19" value="Socket io có sẵn?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1"><mxGeometry x="2420" y="320" width="140" height="80" as="geometry"/></mxCell>
+        <mxCell id="s20" value="Emit new-message cho participants" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="2620" y="210" width="170" height="50" as="geometry"/></mxCell>
+        <mxCell id="s21" value="Mention NexusAI?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1"><mxGeometry x="2620" y="340" width="140" height="80" as="geometry"/></mxCell>
+        <mxCell id="s22" value="Gọi handleAIResponse" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="2820" y="240" width="160" height="50" as="geometry"/></mxCell>
+        <mxCell id="s23" value="HTTP 201" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1"><mxGeometry x="3030" y="340" width="100" height="50" as="geometry"/></mxCell>
+        <mxCell id="s24" value="Catch: log lỗi, HTTP 500" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1"><mxGeometry x="2000" y="540" width="180" height="50" as="geometry"/></mxCell>
+        <mxCell id="s25" value="END ảo (tính V(G))" style="ellipse;whiteSpace=wrap;html=1;fillColor=#e2e8f0;strokeColor=#64748b;" vertex="1" parent="1"><mxGeometry x="3170" y="540" width="120" height="50" as="geometry"/></mxCell>
+        <mxCell id="se1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;" edge="1" parent="1" source="s1" target="s2"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="se2" value="Không" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;" edge="1" parent="1" source="s2" target="s3"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="se3" value="Có" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;" edge="1" parent="1" source="s2" target="s4"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="se4" value="Có" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;" edge="1" parent="1" source="s4" target="s5"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="se5" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;" edge="1" parent="1" source="s5" target="s6"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="se6" value="Có" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;" edge="1" parent="1" source="s6" target="s7"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="se7" value="Có" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;" edge="1" parent="1" source="s7" target="s9"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="se8" value="Không" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;" edge="1" parent="1" source="s7" target="s9"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="se9" value="Không" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;" edge="1" parent="1" source="s6" target="s9"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="se10" value="Không" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;" edge="1" parent="1" source="s4" target="s8"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="se11" value="Có" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;" edge="1" parent="1" source="s8" target="s9"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="se12" value="Không" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;" edge="1" parent="1" source="s8" target="s9"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="se13" value="Không" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;" edge="1" parent="1" source="s9" target="s10"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="se14" value="Có" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;" edge="1" parent="1" source="s9" target="s11"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="se15" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;" edge="1" parent="1" source="s10" target="s11"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="se16" value="Có" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;" edge="1" parent="1" source="s11" target="s12"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="se17" value="Không" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;" edge="1" parent="1" source="s11" target="s14"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="se18" value="Có" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;" edge="1" parent="1" source="s12" target="s13"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="se19" value="Không" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;" edge="1" parent="1" source="s12" target="s14"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="se20" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;" edge="1" parent="1" source="s13" target="s14"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="se21" value="Có" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;" edge="1" parent="1" source="s14" target="s15"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="se22" value="Không" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;" edge="1" parent="1" source="s14" target="s16"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="se23" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;" edge="1" parent="1" source="s15" target="s16"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="se24" value="Lỗi" style="edgeStyle=orthogonalEdgeStyle;html=1;dashed=1;endArrow=block;" edge="1" parent="1" source="s16" target="s24"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="se25" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;" edge="1" parent="1" source="s16" target="s17"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="se26" value="Có" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;" edge="1" parent="1" source="s17" target="s18"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="se27" value="Không" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;" edge="1" parent="1" source="s17" target="s19"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="se28" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;" edge="1" parent="1" source="s18" target="s19"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="se29" value="Có" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;" edge="1" parent="1" source="s19" target="s20"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="se30" value="Không" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;" edge="1" parent="1" source="s19" target="s21"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="se31" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;" edge="1" parent="1" source="s20" target="s21"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="se32" value="Có" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;" edge="1" parent="1" source="s21" target="s22"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="se33" value="Không" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;" edge="1" parent="1" source="s21" target="s23"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="se34" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;" edge="1" parent="1" source="s22" target="s23"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="se35" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;" edge="1" parent="1" source="s3" target="s25"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="se36" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;" edge="1" parent="1" source="s23" target="s25"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="se37" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;" edge="1" parent="1" source="s24" target="s25"><mxGeometry relative="1" as="geometry"/></mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="effective-streak" name="getEffectiveStreak">
+    <mxGraphModel dx="2300" dy="700" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="2300" pageHeight="800" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+        <mxCell id="g1" value="Bắt đầu" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dbeafe;strokeColor=#3b82f6;" vertex="1" parent="1"><mxGeometry x="40" y="260" width="100" height="40" as="geometry"/></mxCell>
+        <mxCell id="g2" value="!streak?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1"><mxGeometry x="200" y="170" width="150" height="70" as="geometry"/></mxCell>
+        <mxCell id="g2b" value="!streak.lastMessageDate?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1"><mxGeometry x="200" y="280" width="170" height="80" as="geometry"/></mxCell>
+        <mxCell id="g2c" value="!streak.count?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1"><mxGeometry x="200" y="410" width="150" height="70" as="geometry"/></mxCell>
+        <mxCell id="g3" value="Trả streak rỗng" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1"><mxGeometry x="430" y="100" width="140" height="50" as="geometry"/></mxCell>
+        <mxCell id="g4" value="Tính dayDiff" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="430" y="420" width="140" height="50" as="geometry"/></mxCell>
+        <mxCell id="g5" value="dayDiff ≥ 2?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1"><mxGeometry x="630" y="250" width="130" height="80" as="geometry"/></mxCell>
+        <mxCell id="g6" value="Trả count=0, reset senders" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1"><mxGeometry x="830" y="100" width="180" height="60" as="geometry"/></mxCell>
+        <mxCell id="g7" value="dayDiff === 0?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1"><mxGeometry x="830" y="250" width="130" height="80" as="geometry"/></mxCell>
+        <mxCell id="g8" value="isBothMessaged = Boolean(streak.isBothMessaged)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1"><mxGeometry x="1030" y="190" width="190" height="60" as="geometry"/></mxCell>
+        <mxCell id="g9" value="isBothMessaged = false" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1"><mxGeometry x="1030" y="340" width="190" height="60" as="geometry"/></mxCell>
+        <mxCell id="g10" value="dayDiff === 0?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1"><mxGeometry x="1280" y="260" width="150" height="80" as="geometry"/></mxCell>
+        <mxCell id="g10b" value="Array.isArray(streak.senders)?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1"><mxGeometry x="1510" y="250" width="170" height="90" as="geometry"/></mxCell>
+        <mxCell id="g11" value="senders = streak.senders" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1"><mxGeometry x="1740" y="170" width="160" height="50" as="geometry"/></mxCell>
+        <mxCell id="g12" value="senders = []" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1"><mxGeometry x="1740" y="390" width="160" height="50" as="geometry"/></mxCell>
+        <mxCell id="g13" value="Return count, lastMessageDate, senders, isBothMessaged" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1"><mxGeometry x="1950" y="270" width="200" height="70" as="geometry"/></mxCell>
+        <mxCell id="g14" value="Kết thúc" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dbeafe;strokeColor=#3b82f6;" vertex="1" parent="1"><mxGeometry x="2200" y="280" width="100" height="50" as="geometry"/></mxCell>
+        <mxCell id="ge1" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;" edge="1" parent="1" source="g1" target="g2"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="ge2" value="Có" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;" edge="1" parent="1" source="g2" target="g3"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="ge3" value="Không" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;" edge="1" parent="1" source="g2" target="g2b"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="ge3b" value="Có" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;" edge="1" parent="1" source="g2b" target="g3"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="ge3c" value="Không" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;" edge="1" parent="1" source="g2b" target="g2c"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="ge3d" value="Có" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;" edge="1" parent="1" source="g2c" target="g3"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="ge3e" value="Không" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;" edge="1" parent="1" source="g2c" target="g4"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="ge4" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;" edge="1" parent="1" source="g4" target="g5"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="ge5" value="Có" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;" edge="1" parent="1" source="g5" target="g6"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="ge6" value="Không" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;" edge="1" parent="1" source="g5" target="g7"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="ge7" value="Có" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;" edge="1" parent="1" source="g7" target="g8"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="ge8" value="Không" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;" edge="1" parent="1" source="g7" target="g9"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="ge9" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;" edge="1" parent="1" source="g8" target="g10"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="ge10" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;" edge="1" parent="1" source="g9" target="g10"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="ge11" value="Có" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;" edge="1" parent="1" source="g10" target="g10b"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="ge12" value="Không" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;" edge="1" parent="1" source="g10" target="g12"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="ge12b" value="Có" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;" edge="1" parent="1" source="g10b" target="g11"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="ge12c" value="Không" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;" edge="1" parent="1" source="g10b" target="g12"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="ge13" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;" edge="1" parent="1" source="g11" target="g13"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="ge14" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;" edge="1" parent="1" source="g12" target="g13"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="ge15" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;" edge="1" parent="1" source="g3" target="g14"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="ge16" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;" edge="1" parent="1" source="g6" target="g14"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="ge17" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;" edge="1" parent="1" source="g13" target="g14"><mxGeometry relative="1" as="geometry"/></mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="conversation-helper" name="updateConversationAfterCreateMessage">
+    <mxGraphModel dx="2800" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="2800" pageHeight="900" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+        <mxCell id="u1" value="Bắt đầu" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dbeafe;strokeColor=#3b82f6;" vertex="1" parent="1"><mxGeometry x="40" y="320" width="100" height="40" as="geometry"/></mxCell>
+        <mxCell id="u2" value="Chọn finalContent: view-once / text / file / ảnh / audio / poll / contact / rỗng" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1"><mxGeometry x="200" y="290" width="260" height="100" as="geometry"/></mxCell>
+        <mxCell id="u3" value="Set lastMessage và seenBy" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="520" y="310" width="170" height="60" as="geometry"/></mxCell>
+        <mxCell id="u4" value="Cập nhật unreadCounts cho participants" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="750" y="310" width="210" height="60" as="geometry"/></mxCell>
+        <mxCell id="u5" value="Conversation direct?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1"><mxGeometry x="1020" y="300" width="140" height="80" as="geometry"/></mxCell>
+        <mxCell id="u6" value="Lấy tin nhắn hôm nay; xác định activeSenders / isBoth" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="1220" y="290" width="230" height="100" as="geometry"/></mxCell>
+        <mxCell id="u7" value="Streak có ngày cuối và count ≥ 1?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1"><mxGeometry x="1510" y="290" width="160" height="90" as="geometry"/></mxCell>
+        <mxCell id="u8" value="Bắt đầu streak = 1" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="1740" y="140" width="150" height="50" as="geometry"/></mxCell>
+        <mxCell id="u9" value="dayDiff ≥ 2?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1"><mxGeometry x="1740" y="290" width="140" height="80" as="geometry"/></mxCell>
+        <mxCell id="u10" value="Reset streak = 1" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="1950" y="140" width="140" height="50" as="geometry"/></mxCell>
+        <mxCell id="u11" value="dayDiff === 1?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1"><mxGeometry x="1950" y="290" width="140" height="80" as="geometry"/></mxCell>
+        <mxCell id="u12" value="isBoth?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1"><mxGeometry x="2160" y="290" width="150" height="90" as="geometry"/></mxCell>
+        <mxCell id="u13" value="Giữ count (cùng ngày)" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="2160" y="450" width="150" height="50" as="geometry"/></mxCell>
+        <mxCell id="u14" value="Gán streak mới; markModified nếu có" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1"><mxGeometry x="2380" y="300" width="200" height="70" as="geometry"/></mxCell>
+        <mxCell id="u15" value="Kết thúc" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dbeafe;strokeColor=#3b82f6;" vertex="1" parent="1"><mxGeometry x="2650" y="310" width="100" height="50" as="geometry"/></mxCell>
+        <mxCell id="u16" value="Tăng count lên 1" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="2370" y="150" width="150" height="50" as="geometry"/></mxCell>
+        <mxCell id="u17" value="Giữ count (chưa đủ hai bên)" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1"><mxGeometry x="2370" y="470" width="180" height="50" as="geometry"/></mxCell>
+        <mxCell id="ue1" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;" edge="1" parent="1" source="u1" target="u2"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="ue2" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;" edge="1" parent="1" source="u2" target="u3"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="ue3" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;" edge="1" parent="1" source="u3" target="u4"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="ue4" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;" edge="1" parent="1" source="u4" target="u5"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="ue5" value="Không" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;" edge="1" parent="1" source="u5" target="u15"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="ue6" value="Có" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;" edge="1" parent="1" source="u5" target="u6"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="ue7" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;" edge="1" parent="1" source="u6" target="u7"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="ue8" value="Không" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;" edge="1" parent="1" source="u7" target="u8"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="ue9" value="Có" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;" edge="1" parent="1" source="u7" target="u9"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="ue10" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;" edge="1" parent="1" source="u8" target="u14"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="ue11" value="Có" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;" edge="1" parent="1" source="u9" target="u10"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="ue12" value="Không" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;" edge="1" parent="1" source="u9" target="u11"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="ue13" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;" edge="1" parent="1" source="u10" target="u14"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="ue14" value="Có" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;" edge="1" parent="1" source="u11" target="u12"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="ue15" value="Không" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;" edge="1" parent="1" source="u11" target="u13"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="ue16" value="Không" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;" edge="1" parent="1" source="u12" target="u17"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="ue17" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;" edge="1" parent="1" source="u13" target="u14"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="ue18" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;" edge="1" parent="1" source="u14" target="u15"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="ue19" value="Có" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;" edge="1" parent="1" source="u12" target="u16"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="ue20" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;" edge="1" parent="1" source="u16" target="u14"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="ue21" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;" edge="1" parent="1" source="u17" target="u14"><mxGeometry relative="1" as="geometry"/></mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

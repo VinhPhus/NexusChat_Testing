@@ -1,68 +1,48 @@
 # White-Box Test Cases — message module
 
-> **TV2 (Ookinaha)** | Phạm vi: `messageController.js`, `messageHelper.js`
+> **TV2 (PhuongBao)** | Phạm vi: `messageController.js`, `messageHelper.js`
+> Cập nhật test và coverage: 2026-11-13.
 
 ---
 
 ## 1. Control-Flow Graph (CFG) — `getEffectiveStreak`
 
-```
-       START
-         │
-         ▼
- ┌───────────────────────────────────────────┐
- │  !streak || !streak.lastMessageDate       │
- │  || !streak.count ?                       │
- └───────────────────────────────────────────┘
-         │                        │
-       TRUE                     FALSE
-         │                        │
-         ▼                        ▼
-  return {count:0,         dayDiff = getDayDifference(
-  lastMsgDate:null,          streak.lastMessageDate, now)
-  senders:[],                       │
-  isBothMessaged:false}             ▼
-         │               ┌────────────────────┐
-         │               │  dayDiff >= 2 ?     │
-         │               └────────────────────┘
-         │                     │          │
-         │                   TRUE       FALSE
-         │                     │          │
-         │                     ▼          ▼
-         │            return {count:0,  isBoth = (dayDiff===0)
-         │            lastMsgDate:      ? Boolean(streak.isBothMessaged)
-         │            streak.last...,  : false
-         │            senders:[],              │
-         │            isBothMessaged:false}    ▼
-         │                     │      senders = (dayDiff===0
-         │                     │       && Array.isArray(streak.senders))
-         │                     │       ? streak.senders : []
-         │                     │              │
-         │                     │              ▼
-         │                     │       return {
-         │                     │         count: streak.count,
-         │                     │         lastMessageDate: streak.lastMessageDate,
-         │                     │         senders,
-         │                     │         isBothMessaged: isBoth
-         │                     │       }
-         │                     │              │
-         └─────────────────────┴──────────────┘
-                               │
-                              END
+```mermaid
+flowchart TD
+    A([START]) --> B{!streak?}
+    B -- yes --> Z1[Return empty streak]
+    B -- no --> C{!streak.lastMessageDate?}
+    C -- yes --> Z1
+    C -- no --> D{!streak.count?}
+    D -- yes --> Z1
+    D -- no --> E[Calculate dayDiff]
+    E --> F{dayDiff >= 2?}
+    F -- yes --> Z2[Return reset effective streak]
+    F -- no --> G{dayDiff === 0?}
+    G -- yes --> H[isBoth = Boolean(streak.isBothMessaged)]
+    G -- no --> I[isBoth = false]
+    H --> J{dayDiff === 0?}
+    I --> J
+    J -- no --> K[senders = []]
+    J -- yes --> L{Array.isArray(streak.senders)?}
+    L -- yes --> M[senders = streak.senders]
+    L -- no --> K
+    K --> N[Return streak count, date, senders, isBoth]
+    M --> N
 ```
 
 **Các nhánh (branches):**
 
 | Nhánh | Điều kiện | Hướng |
 |-------|-----------|-------|
-| B1 | `!streak \|\| !streak.lastMessageDate \|\| !streak.count` | TRUE → early return |
-| B2 | same as B1 | FALSE → tính dayDiff |
-| B3 | `dayDiff >= 2` | TRUE → chuỗi đứt |
-| B4 | `dayDiff >= 2` | FALSE → tiếp tục |
-| B5 | `dayDiff === 0` (ternary isBoth) | TRUE → isBoth = streak.isBothMessaged |
-| B6 | `dayDiff === 0` (ternary isBoth) | FALSE (dayDiff=1) → isBoth = false |
-| B7 | `dayDiff === 0 && Array.isArray(streak.senders)` | TRUE → senders = streak.senders |
-| B8 | same as B7 | FALSE → senders = [] |
+| B1–B3 | `!streak`, `!streak.lastMessageDate`, `!streak.count` | Mỗi điều kiện có nhánh true (return) và false (tiếp tục) |
+| B4 | `dayDiff >= 2` | TRUE → chuỗi đứt |
+| B5 | `dayDiff >= 2` | FALSE → tiếp tục |
+| B6 | `dayDiff === 0` (ternary isBoth) | TRUE → lấy `isBothMessaged` |
+| B7 | `dayDiff === 0` (ternary isBoth) | FALSE → `false` |
+| B8 | `dayDiff === 0` (ternary senders) | TRUE → kiểm tra kiểu senders |
+| B9 | `Array.isArray(streak.senders)` | TRUE → giữ senders |
+| B10 | `Array.isArray(streak.senders)` | FALSE → senders rỗng |
 
 ---
 
@@ -70,27 +50,34 @@
 
 ### 2.1 `getEffectiveStreak`
 
-Formula: **M = E − N + 2P**
+CFG chi tiết: [`getEffectiveStreak`](./message_CFG.drawio).
 
 | Phần tử | Số lượng |
 |---------|----------|
-| Nodes (N) | 10 |
-| Edges (E) | 13 |
+| Nodes (N) | 17 |
+| Edges (E) | 23 |
 | Connected components (P) | 1 |
 
-> **M = 13 − 10 + 2 = 5**
+> **V(G) = 23 − 17 + 2 = 8**
 
-Hoặc đếm điều kiện độc lập:
-1. `!streak || !streak.lastMessageDate || !streak.count`
-2. `dayDiff >= 2`
-3. `dayDiff === 0` (ternary isBoth)
-4. `dayDiff === 0 && Array.isArray(streak.senders)` (ternary senders)
+CFG tách từng toán hạng short-circuit của guard và biểu thức `&&` khi tạo
+`senders`. `dayDiff === 0` được kiểm tra riêng cho `isBothMessaged` và
+`senders`, đúng với hai điểm quyết định trong source.
 
-**M = 4 + 1 = 5** ✓
+Các predicate của CFG:
+1. `!streak`
+2. `!streak.lastMessageDate`
+3. `!streak.count`
+4. `dayDiff >= 2`
+5. `dayDiff === 0` (ternary `isBothMessaged`)
+6. `dayDiff === 0` (vế trái của `&&` khi tạo `senders`)
+7. `Array.isArray(streak.senders)`
+
+**V(G) = 7 + 1 = 8**
 
 ### 2.2 `sendDirectMessage`
 
-Các điều kiện độc lập:
+Một số điều kiện cấp cao (không phải danh sách đầy đủ để tính CC):
 
 | # | Điều kiện |
 |---|-----------|
@@ -105,7 +92,74 @@ Các điều kiện độc lập:
 | 9 | `io` truthy |
 | 10 | `content?.includes("@NexusAI") \|\| (mentions && mentions.includes(...))` |
 
-**M = 10 + 1 = 11**
+> Bản nháp trước ghi `M = 11` nhưng bảng trên bỏ sót nhánh `else if`,
+> shared contact và exception. Không dùng con số đó làm CC chính thức. CFG
+> rút gọn trong [`message_CFG.drawio`](./message_CFG.drawio) gộp mỗi biểu thức
+> điều kiện thành một predicate và gộp các return vào một nút thoát ảo:
+> `E = 37`, `N = 25`, `P = 1`, nên `V(G) = 37 − 25 + 2 = 14`.
+> Đây là CC của CFG rút gọn, chưa phải CC source-level theo quy trình
+> `02_QUY_TRINH_KIEM_THU_WHITEBOX.md`, vì các toán tử `&&` / `||` và nhánh
+> exception chưa được bung thành từng predicate riêng.
+
+### 2.3 `updateConversationAfterCreateMessage`
+
+Theo CFG trong [`message_CFG.drawio`](./message_CFG.drawio), các biểu thức
+`finalContent` được nhóm thành một khối xử lý và các nhánh streak được giữ
+riêng:
+
+| Phần tử | Số lượng |
+|---------|----------|
+| Nodes (N) | 17 |
+| Edges (E) | 21 |
+| Connected components (P) | 1 |
+
+> **V(G) = 21 − 17 + 2 = 6 (CFG rút gọn)**
+
+Phần `finalContent`, short-circuit, unread count và xử lý exception được nhóm
+trong CFG này. Con số 6 không phải CC source-level của toàn hàm.
+
+### 2.4 Basis Paths
+
+**`getEffectiveStreak` — source-level V(G) = 8**
+1. `TC-GS-01`: `streak` thiếu.
+2. `TC-GS-03`: `streak` có nhưng `lastMessageDate` thiếu.
+3. `TC-GS-02`: `streak` và ngày có nhưng `count` bằng 0.
+4. `TC-GS-04`: guard hợp lệ, `dayDiff >= 2`.
+5. `TC-GS-06`: cùng ngày, `isBothMessaged` truthy và `senders` là array.
+6. `TC-GS-07`: cùng ngày, `senders` không phải array.
+7. `TC-GS-05`: `dayDiff = 1`.
+8. Predicate `dayDiff === 0` được đánh giá lần hai trong biểu thức `senders`.
+   Đây là điểm quyết định lặp trên cùng giá trị; đường đi độc lập thứ 8 về mặt
+   đồ thị không khả thi độc lập với predicate ngày ở mục 5–7. Vì vậy không
+   khẳng định đạt 100% path coverage chỉ từ branch coverage.
+
+**`sendDirectMessage` — V(G) = 14 trên CFG rút gọn**
+1. `TC-SM-01`: thiếu nội dung, trả HTTP 400.
+2. `TC-SM-02`: conversation direct đã có, nhánh gửi thường.
+3. `TC-SM-10`: fallback conversation ID và người nhận là participant.
+4. `TC-SM-11`: fallback ID không hợp lệ, tạo conversation mới.
+5. `TC-SM-12`: không có recipient ID, tra theo conversation ID.
+6. Nhánh không có recipient ID và conversation ID: chưa có test; source hiện tại vẫn tạo conversation với recipient chưa xác định.
+7. `TC-SM-03`: không tìm thấy conversation, tạo conversation.
+8. `TC-SM-04`: incognito hoạt động và chưa hết hạn.
+9. `TC-SM-05`: incognito hết hạn.
+10. `TC-SM-06`: có `expiresIn` tùy chỉnh.
+11. `TC-SM-09`: shared contact.
+12. `TC-SM-13`: phát socket event.
+13. `TC-SM-07` / `TC-SM-14`: kích hoạt AI qua nội dung hoặc mention ID.
+14. `TC-SM-15`: exception, trả HTTP 500.
+
+**`updateConversationAfterCreateMessage` — V(G) = 6 trên CFG rút gọn**
+1. `TC-UC-07`: conversation nhóm, không xử lý streak.
+2. `TC-UC-02`: streak chưa có ngày cuối, bắt đầu từ 1.
+3. `TC-UC-03`: streak đứt, khởi động lại từ 1.
+4. `TC-UC-04`: ngày kế tiếp và cả hai bên đã nhắn.
+5. `TC-UC-05`: ngày kế tiếp nhưng chưa đủ hai bên.
+6. `TC-UC-06`: cùng ngày, giữ count.
+
+`getDayDifference` có 3 luồng ở mức short-circuit: `d1` thiếu, `d1` có nhưng
+`d2` thiếu, và cả hai ngày hợp lệ; vì vậy **V(G) = 3** (được kiểm tra bởi
+`TC-DD-01` đến `TC-DD-05`).
 
 ---
 
@@ -202,4 +256,66 @@ Các điều kiện độc lập:
 
 ---
 
-> _Tài liệu được tạo bởi TV2 (Ookinaha) — NexusChat White-Box Testing Sprint_
+## 8. Test cases bổ sung và kết quả
+
+Ba file Jest bao phủ helper và các endpoint trong controller:
+
+- [`messageController.test.js`](../../tests/whitebox/message/messageController.test.js)
+- [`messageControllerOther.test.js`](../../tests/whitebox/message/messageControllerOther.test.js)
+- [`messageHelper.test.js`](../../tests/whitebox/message/messageHelper.test.js)
+
+Các tình huống bổ sung cho `sendDirectMessage`: gửi audio/ảnh/file/liên hệ,
+fallback theo conversation ID, không dùng conversation của người khác, gửi theo
+conversation ID không có recipient, phát socket, gọi AI qua mention ID và trả
+HTTP 500 khi tạo message lỗi.
+
+Suite bổ sung kiểm tra các nhánh thành công, lỗi, phân quyền, socket và dữ liệu
+ranh giới của `sendGroupMessage`, upload audio/image/file, reaction, pin,
+view-once, recall, poll, translate, edit và delete. Các tình huống helper gồm
+unread counts, streak mới/bị đứt/sang ngày mới/cùng ngày, cả hai người đã nhắn,
+participant ID nhiều dạng và group không cập nhật streak.
+
+| Test Case | Nhánh/đường dẫn được kiểm tra |
+|---|---|
+| `TC-SM-09` (4 trường hợp) | Chỉ có audio, ảnh, file hoặc shared contact |
+| `TC-SM-10` | Fallback conversation ID; người nhận là participant |
+| `TC-SM-11` | Fallback ID không thuộc người nhận; tạo conversation mới |
+| `TC-SM-12` | Tra conversation ID khi không có recipient ID |
+| `TC-SM-13`, `TC-SM-13b` | Socket có/không có `unreadCounts` |
+| `TC-SM-14` | Nhánh gọi NexusAI qua mention ID |
+| `TC-SM-15` | Exception khi tạo message, trả HTTP 500 |
+| `TC-GS-07` | `senders` không phải array |
+| `TC-UC-01` | Unread count và streak khởi tạo |
+| `TC-UC-02`–`TC-UC-06` | Các luồng streak mới, đứt, ngày kế tiếp và cùng ngày |
+| `TC-UC-07` | Tin nhắn nhóm không cập nhật streak |
+| `TC-UC-08`, `TC-UC-09` | Dạng participant ID và số participant |
+| `messageControllerOther.test.js` | 38 test cho 12 endpoint còn lại, gồm success/error/permission/notification paths |
+
+| Phạm vi | Statements | Branches | Functions | Lines |
+|---|---:|---:|---:|---:|
+| `messageHelper.js` | 100% | 93.75% | 100% | 100% |
+| `messageController.js` toàn file | 99.07% | 90.19% | 93.75% | 99.01% |
+
+**Đạt chỉ tiêu của nhóm:** controller đạt Statement ≥ 90% và Branch ≥ 80%;
+helper cũng đạt cả hai ngưỡng. Ba dòng chưa được thực thi trong controller là
+nhánh xóa `gameEvent` khi thu hồi tin nhắn. Source import
+`backend/src/models/Game.js`, nhưng model này không có trong repository; luồng
+này không thể kiểm thử thành công với source hiện tại.
+
+`sendDirectMessageFile` có trong bảng phân công nhưng không có hàm/export trong
+`messageController.js` hiện tại. Nhánh không có cả `recipientId` lẫn
+`conversationId` của `sendDirectMessage` cũng chưa được chạy; source hiện tại
+vẫn đi vào tạo conversation với recipient chưa xác định.
+
+### Lệnh kiểm thử và kết quả
+
+Chạy từ thư mục `backend`:
+
+```bash
+npm run test:coverage -- --runTestsByPath ../tests/whitebox/message/messageController.test.js ../tests/whitebox/message/messageControllerOther.test.js ../tests/whitebox/message/messageHelper.test.js
+```
+
+Kết quả: **3 suites passed, 87 tests passed**. `messageController.js` đạt
+99.07% statements / 90.19% branches; `messageHelper.js` đạt 100% / 93.75%.
+
+> _Tài liệu được cập nhật bởi TV2 (PhuongBao) — NexusChat White-Box Testing Sprint_
