@@ -50,6 +50,7 @@ dist-ssr
 *.suo
 coverage/
 *.lcov
+output/junit/
 *.ntvs*
 *.njsproj
 *.sln

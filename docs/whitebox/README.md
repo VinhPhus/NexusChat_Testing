@@ -12,7 +12,7 @@ Thư mục này lưu trữ toàn bộ tài liệu đặc tả, sơ đồ dòng �
 | **TV2** | **Phuong Bao** | **Tin nhắn & Streak (Messages & Streak)** | [`message_test_cases.md`](./message_test_cases.md) | [`message_CFG.drawio`](./message_CFG.drawio) | [Xem sơ đồ](#2-module-tin-nhắn--chuỗi-streak-tv2--PhuongBao) | ✅ **87/87 tests passed; coverage đạt ngưỡng** |
 | **TV3** | **Trung Chiến** | **Bạn bè & Quyền riêng tư (Friendship & Privacy)** | `friend_test_cases.md` | `friend_CFG.drawio` | [Xem sơ đồ](#3-module-bạn-bè--quyền-riêng-tư-tv3--trung-chiến) | 🔄 Đang hoàn thiện |
 | **TV4** | **Nhật Duy ** | **Người dùng & Dịch thuật/AI Services** | [`user_service_test_cases.md`](./user_service_test_cases.md) | [`user_service_CFG.drawio`](./user_service_CFG.drawio) | [Xem sơ đồ](#4-module-người-dùng--dịch-thuật-tv4--nhật-duy) | ✅ **Hoàn thành (42/42 Passed)** |
-| **TV5** | **Giang Tỷ / Thành viên 5** | **Lập lịch & Đánh giá (Schedule & Reviews)** | `WHITEBOX_REPORT.md` | `schedule_CFG.drawio` | [Xem sơ đồ](#5-module-lập-lịch--đánh-giá-tv5--giang-tỷ) | 🔄 Đang hoàn thiện |
+| **TV5** | **Giang Tỷ / Thành viên 5** | **Lập lịch, Review & Feedback** | [`WHITEBOX_REPORT.md`](./WHITEBOX_REPORT.md) | CFG Mermaid trong báo cáo | [Xem báo cáo](#5-module-lập-lịch--đánh-giá-tv5--giang-tỷ) | ✅ **38/38 test mục tiêu Passed; coverage 100%** |
 
 ---
 
@@ -271,10 +271,15 @@ flowchart TD
 ---
 
 ## 5. Module Lập lịch & Đánh giá (TV5 — Giang Tỷ)
-- **Tài liệu đặc tả**: `WHITEBOX_REPORT.md` *(Đang hoàn thiện)*
-- **File Draw.io**: `schedule_CFG.drawio` *(Đang hoàn thiện)*
-- **Hàm trọng tâm**: `processScheduledMessages` trong `scheduleWorker.js` và `submitReview` trong `reviewController.js`.
-- *(Thành viên 5 sẽ dán biểu đồ Mermaid và link file vẽ vào đây khi hoàn thành)*
+- **Báo cáo, CFG, Cyclomatic Complexity và ma trận test case**: [`WHITEBOX_REPORT.md`](./WHITEBOX_REPORT.md).
+- **Test Jest**:
+  - [`scheduleWorker.test.js`](../../tests/whitebox/services/scheduleWorker.test.js): 18 test cho batch lịch gửi, @NexusAI, lỗi từng item, reset streak và vòng đời worker.
+  - [`reviewController.test.js`](../../tests/whitebox/review/reviewController.test.js): 16 test cho kiểm duyệt AI/fallback, danh sách và thống kê review.
+  - [`feedbackController.test.js`](../../tests/whitebox/review/feedbackController.test.js): 4 test cho validation, chuẩn hóa và lưu feedback.
+- **Kết quả lần chạy toàn suite**: 13/13 suites; 251 passed, 0 failed, 7 todo. Ba file mục tiêu đạt 100% Statements, Branches, Functions và Lines.
+- **CC `processScheduledMessages`**: `V(G) = 18`, tính cả vòng lặp và các nhánh short-circuit.
+- **Coverage toàn `backend/src`**: Statements 36.90%, Branches 36.35%, Functions 32.50%, Lines 37.47%; các module ngoài phạm vi còn nhiều dòng chưa được kiểm thử.
+- Chạy từ `backend` bằng `npm run test:coverage -- --runInBand`. JUnit XML và HTML coverage được tạo trong `output/junit/` và `coverage/lcov-report/`.
 
 ---
 
@@ -287,4 +292,3 @@ Khi thành viên hoàn thành xong phần của mình:
    - Cập nhật link file và trạng thái tại bảng tổng hợp ở đầu trang.
    - Thêm biểu đồ Mermaid tương ứng của hàm bạn đã vẽ để hiển thị trực quan ngay trên GitHub.
 4. Commit lên GitHub theo cú pháp Jira: `git commit -m "KAN-XX: Hoan thanh kiem thu White-box module ..."`
-

@@ -13,5 +13,12 @@ export default {
   ],
   coverageDirectory: "coverage",
   coverageReporters: ["text", "lcov", "html"],
+  reporters: [
+    "default",
+    ["<rootDir>/backend/node_modules/jest-junit", {
+      outputDirectory: "<rootDir>/output/junit",
+      outputName: "whitebox-junit.xml",
+    }],
+  ],
   testMatch: ["<rootDir>/tests/whitebox/**/*.test.js"]
 };

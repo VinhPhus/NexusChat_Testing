@@ -47,9 +47,12 @@ tests/whitebox/
 │   ├── translateService.test.js   # TV4: Multi-tier fallback (V(G)=6)
 │   └── scheduleWorker.test.js     # TV5: Batch processing & streak
 ├── review/                     # TV5 (GiangTy / ThanhVien5)
-│   └── reviewController.test.js   # TV5: AI moderation & filter
+│   ├── reviewController.test.js   # TV5: AI moderation, reviews & stats
+│   └── feedbackController.test.js # TV5: feedback validation & persistence
 └── __mocks__/                  # Helpers tạo mock Model Mongoose
 ```
+
+`jest-junit` reporter ghi kết quả XML tại `output/junit/whitebox-junit.xml`.
 
 ---
 
